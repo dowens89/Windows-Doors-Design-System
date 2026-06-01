@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Nav } from './ds/Nav'
+import { SiteNav } from './SiteNav'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -9,7 +9,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-paper">
-      <Nav />
+      <SiteNav />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
