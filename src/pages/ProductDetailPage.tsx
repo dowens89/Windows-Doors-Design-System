@@ -1,16 +1,475 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { Check, AlertCircle, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { Layout } from '../components/Layout'
+import { SchemaTag } from '../components/SchemaTag'
+import { Button } from '../components/ds/Button'
+import { Badge } from '../components/ds/Badge'
+import { Alert } from '../components/ds/Alert'
+import { FAQ } from '../components/ds/FAQ'
+import { PriceDisplay } from '../components/ds/PriceDisplay'
+import { ProductCard } from '../components/ds/ProductCard'
+import { EmptyState } from '../components/ds/EmptyState'
 import { useSEO } from '../utils/seo'
+import { productSchema, faqSchema } from '../utils/schema'
+import { products } from '../data/products'
+import type { Product } from '../data/products'
+import { useBasketStore } from '../store/basketStore'
+
+function calcPrice(product: Product, selections: Record<string, string>, measurement: { width: string; height: string }) {
+  let price = product.basePrice
+  for (const variant of product.variants) {
+    const selected = selections[variant.id]
+    if (selected) {
+      const opt = variant.options.find((o) => o.id === selected)
+      if (opt) price += opt.priceModifier
+    }
+  }
+  const w = parseFloat(measurement.width)
+  const h = parseFloat(measurement.height)
+  if (w > 0 && h > 0) {
+    const areaM2 = (w / 1000) * (h / 1000)
+    const threshold = product.category === 'windows' ? 0.5 : 0.6
+    const rate = product.category === 'windows' ? 280 : 350
+    if (areaM2 > threshold) {
+      price += Math.round((areaM2 - threshold) * rate)
+    }
+  }
+  return price
+}
 
 export function ProductDetailPage() {
+  const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
+  const addItem = useBasketStore((s) => s.addItem)
+
+  const product = products.find((p) => p.slug === slug)
+
   useSEO({
-    title: 'Product | Windows & Doors Online',
-    description: 'Product detail page.',
+    title: product ? product.seo.title : 'Product | Windows & Doors Online',
+    description: product ? product.seo.description : '',
   })
+
+  const [selections, setSelections] = useState<Record<string, string>>(() => {
+    if (!product) return {}
+    const init: Record<string, string> = {}
+    for (const v of product.variants) {
+      init[v.id] = v.options[0].id
+    }
+    return init
+  })
+
+  const [measureOpen, setMeasureOpen] = useState(false)
+  const [measureUnit, setMeasureUnit] = useState<'MM' | 'CM'>('MM')
+  const [measurement, setMeasurement] = useState({ width: '', height: '' })
+  const [added, setAdded] = useState(false)
+
+  const price = useMemo(() => {
+    if (!product) return 0
+    const mmW =
+      measurement.width
+        ? measureUnit === 'CM'
+          ? parseFloat(measurement.width) * 10
+          : parseFloat(measurement.width)
+        : 0
+    const mmH =
+      measurement.height
+        ? measureUnit === 'CM'
+          ? parseFloat(measurement.height) * 10
+          : parseFloat(measurement.height)
+        : 0
+    return calcPrice(product, selections, { width: String(mmW), height: String(mmH) })
+  }, [product, selections, measurement, measureUnit])
+
+  if (!product) {
+    return (
+      <Layout>
+        <div className="max-w-[1200px] mx-auto px-6 md:px-8 py-24">
+          <EmptyState
+            icon={Search}
+            title="Product not found"
+            description="We couldn't find that product. Browse our full range below."
+            actionLabel="Browse all products"
+            onAction={() => navigate('/shop')}
+          />
+        </div>
+      </Layout>
+    )
+  }
+
+  const relatedProducts = product.relatedProductIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is Product => p !== undefined)
+    .slice(0, 3)
+
+  function handleAddToBasket() {
+    const variantSummary = product.variants
+      .map((v) => {
+        const sel = selections[v.id]
+        const opt = v.options.find((o) => o.id === sel)
+        return opt ? opt.label : ''
+      })
+      .filter(Boolean)
+      .join(', ')
+
+    addItem({
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      selectedVariants: selections,
+      variantSummary,
+      indicativePrice: price,
+      quantity: 1,
+    })
+    setAdded(true)
+  }
+
   return (
     <Layout>
-      <div className="max-w-[1200px] mx-auto px-6 md:px-8 py-16">
-        <h1 className="font-display text-4xl text-ink">ProductDetailPage — coming in Step Two</h1>
+      <SchemaTag schema={productSchema(product)} />
+      <SchemaTag schema={faqSchema(product.faqs)} />
+
+      <div className="max-w-[1200px] mx-auto px-6 md:px-8 py-12">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 font-sans text-sm text-ink-muted mb-8">
+          <Link to="/shop" className="hover:text-ink transition-colors">
+            Shop
+          </Link>
+          <span>/</span>
+          <Link
+            to={`/shop?category=${product.category}`}
+            className="hover:text-ink transition-colors capitalize"
+          >
+            {product.category}
+          </Link>
+          <span>/</span>
+          <span className="text-ink">{product.name}</span>
+        </nav>
+
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-12 mb-16">
+          {/* Left: image + badges */}
+          <div>
+            <div className="aspect-[4/3] bg-hairline overflow-hidden mb-6">
+              <img
+                src={product.imageUrl}
+                alt={`${product.name} installed in West Yorkshire`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="accreditation">FENSA Registered</Badge>
+              <Badge variant="verified">Vetted Installer</Badge>
+              <Badge variant="accreditation">Insurance Backed</Badge>
+            </div>
+          </div>
+
+          {/* Right: configurator */}
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl text-ink mb-6">
+              {product.seo.h1}
+            </h1>
+
+            {/* Price */}
+            <div className="mb-8">
+              <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-2">
+                Indicative Installed Price
+              </p>
+              <PriceDisplay price={price} size="large" assuranceText="" />
+              <p className="font-sans text-sm text-ink-muted mt-2">
+                {product.unit} &mdash; confirmed at survey, no payment today
+              </p>
+            </div>
+
+            {/* Variants */}
+            <div className="space-y-7 mb-8">
+              {product.variants.map((variant) => {
+                const selectedOpt = variant.options.find((o) => o.id === selections[variant.id])
+                return (
+                  <div key={variant.id}>
+                    <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink mb-3">
+                      {variant.label}
+                    </p>
+
+                    {variant.type === 'colour' ? (
+                      <>
+                        <div className="flex flex-wrap gap-3 mb-2">
+                          {variant.options.map((opt) => {
+                            const isSelected = selections[variant.id] === opt.id
+                            return (
+                              <button
+                                key={opt.id}
+                                style={{
+                                  backgroundColor: opt.hex,
+                                  borderColor: isSelected
+                                    ? 'var(--color-brand)'
+                                    : opt.borderHex || 'transparent',
+                                }}
+                                className={`w-11 h-11 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none ${
+                                  isSelected ? 'ring-2 ring-brand ring-offset-2 ring-offset-paper' : ''
+                                }`}
+                                onClick={() =>
+                                  setSelections((s) => ({ ...s, [variant.id]: opt.id }))
+                                }
+                                aria-label={
+                                  opt.priceModifier > 0
+                                    ? `${opt.label} — adds £${opt.priceModifier}`
+                                    : `${opt.label} — included`
+                                }
+                                aria-pressed={isSelected}
+                                title={opt.label}
+                              />
+                            )
+                          })}
+                        </div>
+                        {selectedOpt && (
+                          <p className="font-sans text-sm text-ink">
+                            {selectedOpt.label}
+                            {selectedOpt.priceModifier > 0 && (
+                              <span className="text-ink-muted"> — + £{selectedOpt.priceModifier}</span>
+                            )}
+                            {selectedOpt.priceModifier === 0 && (
+                              <span className="text-ink-muted"> — Included</span>
+                            )}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {variant.options.map((opt) => {
+                          const isSelected = selections[variant.id] === opt.id
+                          return (
+                            <button
+                              key={opt.id}
+                              onClick={() =>
+                                setSelections((s) => ({ ...s, [variant.id]: opt.id }))
+                              }
+                              className={`flex flex-col items-center px-3 py-2 border rounded font-sans text-sm transition-colors focus:outline-none ${
+                                isSelected
+                                  ? 'bg-brand text-paper border-brand'
+                                  : 'bg-surface border-hairline text-ink hover:border-brand hover:text-brand'
+                              }`}
+                            >
+                              <span>{opt.label}</span>
+                              {opt.priceModifier > 0 && (
+                                <span className={`text-xs mt-0.5 ${isSelected ? 'text-paper opacity-75' : 'text-ink-muted'}`}>
+                                  + £{opt.priceModifier}
+                                </span>
+                              )}
+                              {opt.priceModifier < 0 && (
+                                <span className={`text-xs mt-0.5 ${isSelected ? 'text-paper opacity-75' : 'text-ink-muted'}`}>
+                                  - £{Math.abs(opt.priceModifier)}
+                                </span>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Measurement input */}
+            <div className="mb-8 border-t border-hairline pt-6">
+              <button
+                onClick={() => setMeasureOpen((o) => !o)}
+                className="flex items-center gap-2 font-sans text-sm text-brand hover:underline"
+              >
+                {measureOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                {measureOpen ? 'Hide measurements' : '+ Know your exact measurements?'}
+              </button>
+
+              {measureOpen && (
+                <div className="mt-4 space-y-4">
+                  <div className="flex gap-2 mb-4">
+                    {(['MM', 'CM'] as const).map((u) => (
+                      <button
+                        key={u}
+                        onClick={() => setMeasureUnit(u)}
+                        className={`px-4 py-1.5 border font-sans text-sm rounded transition-colors ${
+                          measureUnit === u
+                            ? 'bg-ink text-paper border-ink'
+                            : 'bg-surface border-hairline text-ink'
+                        }`}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
+                        Width ({measureUnit})
+                      </label>
+                      <input
+                        type="number"
+                        value={measurement.width}
+                        onChange={(e) => setMeasurement((m) => ({ ...m, width: e.target.value }))}
+                        className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2 rounded focus:outline-none focus:border-brand"
+                        placeholder="e.g. 900"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
+                        Height ({measureUnit})
+                      </label>
+                      <input
+                        type="number"
+                        value={measurement.height}
+                        onChange={(e) => setMeasurement((m) => ({ ...m, height: e.target.value }))}
+                        className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2 rounded focus:outline-none focus:border-brand"
+                        placeholder="e.g. 1200"
+                      />
+                    </div>
+                  </div>
+                  <p className="font-sans text-xs text-ink-muted">
+                    Measure the existing frame, not the glass
+                  </p>
+                  {measurement.width && measurement.height && (
+                    <p className="font-sans text-sm text-ink-muted">
+                      Price adjusted for your measurements. Confirmed at survey.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Add to basket */}
+            {added ? (
+              <div className="space-y-3">
+                <Alert variant="success" message="Added to your quote" />
+                <div className="flex gap-3">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="flex-1"
+                    onClick={() => navigate('/basket')}
+                  >
+                    Added — View Quote
+                  </Button>
+                  <Button variant="ghost" onClick={() => { setAdded(false) }}>
+                    Continue browsing
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="accent" size="lg" className="w-full" onClick={handleAddToBasket}>
+                Add to Quote
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Below-fold content */}
+        <div className="border-t border-hairline pt-16 space-y-16">
+          {/* Features */}
+          {product.features.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-ink mb-6">Key features</h2>
+              <ul className="space-y-3">
+                {product.features.map((f) => (
+                  <li key={f} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" strokeWidth={2} />
+                    <span className="font-sans text-base text-ink">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* What's included */}
+          <div>
+            <h2 className="font-display text-2xl text-ink mb-6">What's included</h2>
+            <ul className="space-y-3">
+              {product.included.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <span className="font-sans text-base text-ink">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Potential variations */}
+          <div>
+            <h2 className="font-display text-2xl text-ink mb-3">
+              What might affect your final price
+            </h2>
+            <p className="font-sans text-base text-ink-muted mb-6">
+              In most straightforward installations the price above is the price you pay. The
+              following are the only legitimate reasons a surveyor may need to revise it:
+            </p>
+            <ul className="space-y-3">
+              {product.potentialVariations.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <AlertCircle
+                    className="w-5 h-5 text-accent flex-shrink-0 mt-0.5"
+                    strokeWidth={1.5}
+                  />
+                  <span className="font-sans text-base text-ink">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Description */}
+          <div>
+            <h2 className="font-display text-2xl text-ink mb-6">About {product.name.toLowerCase()}</h2>
+            <div className="space-y-4 max-w-prose">
+              <p className="font-sans text-base text-ink leading-relaxed">
+                {product.name} are one of the most popular choices for West Yorkshire homes. They
+                combine reliable thermal performance with a clean aesthetic that suits a wide range
+                of property styles, from Victorian terraces to modern new builds.
+              </p>
+              <p className="font-sans text-base text-ink leading-relaxed">
+                The price shown is an indicative installed price based on standard conditions for
+                West Yorkshire. It includes supply of the unit to your specification, removal of
+                your existing {product.category === 'windows' ? 'window' : 'door'}, professional
+                installation by a FENSA-registered fitter, and all finishing work.
+              </p>
+              <p className="font-sans text-base text-ink leading-relaxed">
+                A surveyor will visit to confirm your exact measurements before any work begins. In
+                the majority of straightforward jobs, the final price matches what you see here. If
+                anything non-standard is identified, your surveyor will explain it clearly and in
+                writing before any work is agreed.
+              </p>
+            </div>
+          </div>
+
+          {/* FAQ */}
+          {product.faqs.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-ink mb-6">Frequently asked questions</h2>
+              <FAQ items={product.faqs} />
+            </div>
+          )}
+
+          {/* Related products */}
+          {relatedProducts.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-ink mb-8">You might also need</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {relatedProducts.map((rp) => (
+                  <div
+                    key={rp.id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/${rp.category}/${rp.slug}`)}
+                  >
+                    <ProductCard
+                      title={rp.name}
+                      description={rp.shortDescription}
+                      price={rp.basePrice}
+                      imageUrl={rp.imageUrl}
+                      isFromPrice
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   )
