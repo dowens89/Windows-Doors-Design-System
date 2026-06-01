@@ -1,0 +1,38 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=IBM+Plex+Mono:wght@500&family=Inter:wght@400;500;600&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+:root {
+  --color-paper: #F6F2EA;
+  --color-surface: #FBF8F2;
+  --color-ink: #1A1A17;
+  --color-ink-muted: #5A5651;
+  --color-ink-subtle: #8A857E;
+  --color-hairline: #E2DCCE;
+  --color-brand: #2F4A3A;
+  --color-brand-hover: #243A2D;
+  --color-accent: #B8553A;
+  --color-success: #3D6B4A;
+  --color-warning: #A66A24;
+  --color-error: #9E3B2C;
+  --color-info: #2C4257;
+}
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  @apply font-sans antialiased;
+}
+/* Custom utility for hiding scrollbars in the showcase if needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
