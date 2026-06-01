@@ -18,6 +18,7 @@ import { PricingPromisePage } from './pages/PricingPromisePage'
 import { AboutPage } from './pages/AboutPage'
 import { ServiceAreaPage } from './pages/ServiceAreaPage'
 import { BlogPage } from './pages/BlogPage'
+import { BlogPostPage } from './pages/BlogPostPage'
 import { ContactPage } from './pages/ContactPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -48,6 +49,7 @@ export function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/service-area" element={<ServiceAreaPage />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/design-system" element={<DesignSystem />} />
         <Route path="*" element={<NotFoundPage />} />
