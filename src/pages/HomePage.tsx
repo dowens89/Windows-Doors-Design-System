@@ -167,8 +167,8 @@ export function HomePage() {
         {/* Right: image — desktop only */}
         <div className="hidden md:block w-[45%] overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1200"
-            alt="Composite door installed on a residential home"
+            src="https://res.cloudinary.com/dw0wt42ns/image/upload/v1780422068/hero-splash_xnswmo.jpg"
+            alt="New windows and doors installed on a detached house"
             className="w-full h-full object-cover"
           />
         </div>
