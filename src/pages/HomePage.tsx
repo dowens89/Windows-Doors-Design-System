@@ -150,7 +150,17 @@ export function HomePage() {
             </Button>
           </div>
 
-
+          <div className="flex flex-col sm:flex-row gap-5 mt-10">
+            {[
+              { icon: ShieldCheck, text: 'Shop the range' },
+              { icon: BadgeCheck, text: 'Price shown upfront' },
+              { icon: Lock, text: 'No payment today' },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="inline-flex items-center gap-2">
+                <Icon className="w-4 h-4 text-paper shrink-0 opacity-80" strokeWidth={1.5} />
+                <span className="font-sans text-sm text-paper opacity-80">{text}</span>
+              </div>
+            ))}
           </div>
         </div>
 
