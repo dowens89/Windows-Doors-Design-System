@@ -255,7 +255,7 @@ export function HomePage() {
           </p>
 
           {/* FIX 6: lifted card container */}
-          <div className="bg-paper bg-opacity-10 rounded-sm shadow-xl p-8 md:p-12">
+          <div className="bg-paper rounded-sm shadow-xl p-8 md:p-12">
             {/* FIX 4: number inputs clear zero on focus */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               {[
@@ -263,8 +263,8 @@ export function HomePage() {
                 { label: 'Doors', value: doors, set: setDoors, max: 10 },
                 { label: 'Composite Doors', value: compositeDoors, set: setCompositeDoors, max: 5 },
               ].map(({ label, value, set, max }) => (
-                <div key={label} className="bg-white bg-opacity-10 rounded-sm p-4">
-                  <label className="font-sans text-xs text-paper uppercase tracking-wide mb-2 block">
+                <div key={label} className="bg-surface border border-hairline rounded-sm p-4">
+                  <label className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-2 block">
                     {label}
                   </label>
                   <input
@@ -276,15 +276,15 @@ export function HomePage() {
                     onChange={(e) => set(Math.max(0, parseInt(e.target.value) || 0))}
                     onFocus={(e) => { if (e.target.value === '0') e.target.value = '' }}
                     onBlur={(e) => { if (e.target.value === '') { e.target.value = '0'; set(0) } }}
-                    className="bg-transparent text-paper text-2xl font-mono text-center border-b border-paper border-opacity-30 w-full focus:outline-none focus:border-opacity-100 transition-all"
+                    className="bg-transparent text-ink text-2xl font-mono text-center border-b border-hairline w-full focus:outline-none focus:border-brand transition-all"
                   />
                 </div>
               ))}
             </div>
 
             <div className="max-w-xs mx-auto mb-2">
-              <div className="bg-white bg-opacity-10 rounded-sm p-4">
-                <label className="font-sans text-xs text-paper uppercase tracking-wide mb-2 block">
+              <div className="bg-surface border border-hairline rounded-sm p-4">
+                <label className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-2 block">
                   Your Postcode
                 </label>
                 <input
@@ -293,7 +293,7 @@ export function HomePage() {
                   value={quotePostcode}
                   onChange={(e) => setQuotePostcode(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCalculate()}
-                  className="bg-transparent text-paper text-lg font-mono text-center border-b border-paper border-opacity-30 w-full focus:outline-none focus:border-opacity-100 transition-all placeholder:text-paper placeholder:opacity-40"
+                  className="bg-transparent text-ink text-lg font-mono text-center border-b border-hairline w-full focus:outline-none focus:border-brand transition-all placeholder:text-ink-muted"
                 />
               </div>
             </div>
@@ -318,7 +318,7 @@ export function HomePage() {
             </div>
 
             {quoteResult && (
-              <div className="bg-white bg-opacity-15 rounded-sm p-8 mt-8 text-center">
+              <div className="bg-brand rounded-sm p-8 mt-8 text-center">
                 <p className="font-sans text-paper text-sm uppercase tracking-wide mb-4">
                   Your indicative installed price
                 </p>
