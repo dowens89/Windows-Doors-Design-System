@@ -137,7 +137,7 @@ export function HomePage() {
               style={{ backgroundColor: 'var(--color-accent)', borderColor: 'var(--color-accent)' }}
               onClick={() => navigate('/shop')}
             >
-              Browse Products
+              Browse Products & build your order
             </Button>
             <Button
               variant="ghost"
