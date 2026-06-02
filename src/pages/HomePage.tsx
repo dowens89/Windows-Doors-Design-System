@@ -105,7 +105,7 @@ export function HomePage() {
       <SchemaTag schema={localBusinessSchema()} />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="flex flex-col md:flex-row min-h-[500px] md:min-h-screen">
+      <section className="flex flex-col md:flex-row min-h-[500px] md:min-h-[500px]">
         {/* Mobile image — appears above content */}
         <div className="block md:hidden w-full h-[280px] overflow-hidden flex-shrink-0">
           <img
