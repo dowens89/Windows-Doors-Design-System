@@ -151,7 +151,7 @@ export function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-5 mt-10">
             {[
-              { icon: ShieldCheck, text: 'One installer per lead' },
+              { icon: ShieldCheck, text: 'Shop the range' },
               { icon: BadgeCheck, text: 'Price shown upfront' },
               { icon: Lock, text: 'No payment today' },
             ].map(({ icon: Icon, text }) => (
@@ -181,7 +181,7 @@ export function HomePage() {
               <div>
                 <p className="font-display text-xl text-ink">Do we cover your area?</p>
                 <p className="font-sans text-sm text-ink-muted mt-1">
-                  Currently serving West Yorkshire
+                  Currently serving West Yorkshire, South Yorkshire, East Yorkshire, North Yorkshire, Lancashire and Manchester
                 </p>
               </div>
               <div className="flex gap-3 sm:ml-auto items-end">
@@ -253,8 +253,7 @@ export function HomePage() {
           <h2 className="font-display text-4xl text-paper">How much will your job cost?</h2>
 
           <p className="font-sans text-paper opacity-70 text-lg mt-3 mb-10 max-w-lg mx-auto">
-            No contact details needed. Takes 30 seconds. Price is indicative — your surveyor
-            confirms before any work begins.
+            No contact details needed. Takes 30 seconds. Price is indicative based on average costs, get your full fixed price by shopping our range!
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
