@@ -23,7 +23,7 @@ const STEPS: Step[] = [
       'The average WDO customer spends 8 minutes browsing before submitting a survey request.',
     image:
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600',
-    imageAlt: 'Modern window in a West Yorkshire home',
+    imageAlt: 'Modern window in a bright living room',
     imageRight: true,
   },
   {
@@ -34,7 +34,7 @@ const STEPS: Step[] = [
       'Your details go to one installer only — never a list of companies competing for your number.',
     image:
       'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
-    imageAlt: 'Residential street in West Yorkshire',
+    imageAlt: 'Residential street with traditional terrace houses',
     imageRight: false,
   },
   {

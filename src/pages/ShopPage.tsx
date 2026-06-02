@@ -17,9 +17,9 @@ function getPageSEO(category: Category) {
       title: 'Replacement Windows — Installed Prices West Yorkshire | WDO',
       description:
         'Replacement windows with transparent installed prices for West Yorkshire. Casement, sash, tilt & turn, bay and French windows.',
-      h1: 'Replacement Windows — West Yorkshire Installed Prices',
+      h1: 'Replacement Windows — Installed Prices',
       intro:
-        'Browse our full range of replacement windows with honest installed prices for West Yorkshire. All prices include supply, installation by a FENSA-registered fitter, and removal of your existing windows.',
+        'Browse our full range of replacement windows with honest installed prices. All prices include supply, installation by a FENSA-registered fitter, and removal of your existing windows.',
     }
   }
   if (category === 'doors') {
@@ -27,18 +27,18 @@ function getPageSEO(category: Category) {
       title: 'Replacement Doors — Installed Prices West Yorkshire | WDO',
       description:
         'Replacement doors with honest installed prices for West Yorkshire. Composite, uPVC, French, bi-fold and patio doors.',
-      h1: 'Replacement Doors — West Yorkshire Installed Prices',
+      h1: 'Replacement Doors — Installed Prices',
       intro:
-        'Browse our full range of replacement doors with honest installed prices for West Yorkshire. All prices include supply, installation by a FENSA-registered fitter, and removal of your existing door.',
+        'Browse our full range of replacement doors with honest installed prices. All prices include supply, installation by a FENSA-registered fitter, and removal of your existing door.',
     }
   }
   return {
     title: 'Windows & Doors — Installed Prices West Yorkshire | WDO',
     description:
       'Browse replacement windows and doors with honest installed prices for West Yorkshire. See your price online before anyone visits.',
-    h1: 'Windows & Doors — West Yorkshire Installed Prices',
+    h1: 'Windows & Doors — Installed Prices',
     intro:
-      'Browse our full range of windows and doors with honest installed prices for West Yorkshire. All prices include supply, installation by a FENSA-registered fitter, and removal of your existing units.',
+      'Browse our full range of windows and doors with honest installed prices. All prices include supply, installation by a FENSA-registered fitter, and removal of your existing units.',
   }
 }
 

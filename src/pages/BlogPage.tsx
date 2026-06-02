@@ -35,7 +35,7 @@ export function BlogPage() {
     <Layout>
       <div className="max-w-[1200px] mx-auto px-6 md:px-8 py-12">
         <h1 className="font-display text-3xl md:text-4xl text-ink mb-3">
-          Windows and Doors Advice for West Yorkshire Homeowners
+          Windows and Doors — Honest Guides and Local Prices
         </h1>
         <p className="font-sans text-ink-muted mb-10">
           Honest guides and local pricing information. No sales pitch.

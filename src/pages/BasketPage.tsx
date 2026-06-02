@@ -27,7 +27,7 @@ export function BasketPage() {
           <EmptyState
             icon={Package}
             title="Your quote is empty"
-            description="Browse our windows and doors to get started. Prices shown are honest installed prices for West Yorkshire."
+            description="Browse our windows and doors to get started. Prices shown are honest indicative installed prices."
             actionLabel="Browse products"
             onAction={() => navigate('/shop')}
           />

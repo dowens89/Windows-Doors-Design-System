@@ -218,7 +218,7 @@ export const products: Product[] = [
       title: 'Casement Windows Installed West Yorkshire | From £450 | Windows & Doors Online',
       description:
         'Casement windows with honest installed prices for West Yorkshire. Choose your size, colour and glazing. See your price online — no salesperson.',
-      h1: 'Casement Windows — Installed Prices in West Yorkshire',
+      h1: 'Casement Windows — From £450 Installed',
     },
   },
   {
@@ -287,7 +287,7 @@ export const products: Product[] = [
       title: 'Sash Windows Installed West Yorkshire | From £650 | Windows & Doors Online',
       description:
         'Replacement sash windows with honest installed prices for West Yorkshire. Traditional style, modern performance. See your price online.',
-      h1: 'Sash Windows — Installed Prices in West Yorkshire',
+      h1: 'Sash Windows — From £650 Installed',
     },
   },
   {
@@ -344,7 +344,7 @@ export const products: Product[] = [
       title: 'Tilt and Turn Windows West Yorkshire | From £550 | Windows & Doors Online',
       description:
         'Tilt and turn windows installed in West Yorkshire. Dual-action ventilation and easy cleaning. Honest online prices — no salesperson.',
-      h1: 'Tilt & Turn Windows — Installed Prices in West Yorkshire',
+      h1: 'Tilt & Turn Windows — From £550 Installed',
     },
   },
   {
@@ -420,7 +420,7 @@ export const products: Product[] = [
       title: 'Bay Windows Installed West Yorkshire | From £1,200 | Windows & Doors Online',
       description:
         'Bay windows with transparent installed prices for West Yorkshire. Three and five panel options. Get your price online before anyone visits.',
-      h1: 'Bay Windows — Installed Prices in West Yorkshire',
+      h1: 'Bay Windows — From £1,200 Installed',
     },
   },
   {
@@ -480,7 +480,7 @@ export const products: Product[] = [
       title: 'French Windows Installed West Yorkshire | From £850 | Windows & Doors Online',
       description:
         'French windows with honest installed prices for West Yorkshire homes. Full-height glazing, easy access to garden. See your price online.',
-      h1: 'French Windows — Installed Prices in West Yorkshire',
+      h1: 'French Windows — From £850 Installed',
     },
   },
   {
@@ -558,7 +558,7 @@ export const products: Product[] = [
         'Composite Doors Installed West Yorkshire | From £1,195 | Windows & Doors Online',
       description:
         'Composite doors with transparent installed prices for West Yorkshire. Choose your style, colour and glazing. See your price online before anyone visits your home.',
-      h1: 'Composite Doors — Installed Prices in West Yorkshire',
+      h1: 'Composite Doors — From £1,195 Installed',
     },
   },
   {
@@ -629,7 +629,7 @@ export const products: Product[] = [
       title: 'uPVC Doors Installed West Yorkshire | From £695 | Windows & Doors Online',
       description:
         'uPVC doors with honest installed prices for West Yorkshire. Practical and thermally efficient. See your price online — no salesperson.',
-      h1: 'uPVC Doors — Installed Prices in West Yorkshire',
+      h1: 'uPVC Doors — From £695 Installed',
     },
   },
   {
@@ -694,7 +694,7 @@ export const products: Product[] = [
       title: 'French Doors Installed West Yorkshire | From £1,100 | Windows & Doors Online',
       description:
         'French doors with transparent installed prices for West Yorkshire. Full glazing, garden access, honest pricing. See your price online.',
-      h1: 'French Doors — Installed Prices in West Yorkshire',
+      h1: 'French Doors — From £1,100 Installed',
     },
   },
   {
@@ -760,7 +760,7 @@ export const products: Product[] = [
       title: 'Bi-Fold Doors Installed West Yorkshire | From £2,200 | Windows & Doors Online',
       description:
         'Bi-fold doors with honest installed prices for West Yorkshire. 3 to 6 panel options. Get your price online before anyone visits.',
-      h1: 'Bi-Fold Doors — Installed Prices in West Yorkshire',
+      h1: 'Bi-Fold Doors — From £2,200 Installed',
     },
   },
   {
@@ -820,7 +820,7 @@ export const products: Product[] = [
       title: 'Patio Doors Installed West Yorkshire | From £950 | Windows & Doors Online',
       description:
         'Patio doors with transparent installed prices for West Yorkshire. Smooth sliding action, slim sightlines. See your price online.',
-      h1: 'Patio Doors — Installed Prices in West Yorkshire',
+      h1: 'Patio Doors — From £950 Installed',
     },
   },
 ]

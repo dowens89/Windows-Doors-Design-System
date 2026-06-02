@@ -99,7 +99,7 @@ export function BlogPostPage() {
         <div className="mt-16 bg-surface border border-hairline p-8">
           <h3 className="font-display text-xl text-ink mb-3">Get your price online</h3>
           <p className="font-sans text-base text-ink-muted mb-6">
-            See honest installed prices for West Yorkshire before anyone visits your home.
+            See honest installed prices before anyone visits your home.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button variant="primary" onClick={() => navigate('/shop')}>

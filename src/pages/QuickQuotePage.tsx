@@ -45,7 +45,7 @@ export function QuickQuotePage() {
       newErrors.windows = 'Enter at least one item'
     }
     if (!UK_POSTCODE_RE.test(postcode)) {
-      newErrors.postcode = 'Enter a valid West Yorkshire postcode'
+      newErrors.postcode = 'Enter a valid postcode'
     }
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
@@ -172,7 +172,7 @@ export function QuickQuotePage() {
 
             <Alert
               variant="info"
-              message="This is an indicative range based on standard West Yorkshire installation. Your itemised quote shows the exact specification and price for each product."
+              message="This is an indicative range based on standard installation conditions. Your itemised quote shows the exact specification and price for each product."
             />
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">

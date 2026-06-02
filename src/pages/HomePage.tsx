@@ -69,7 +69,7 @@ export function HomePage() {
       errs.items = 'Enter at least one item'
     }
     if (!UK_POSTCODE_RE.test(quotePostcode)) {
-      errs.postcode = 'Enter a valid West Yorkshire postcode'
+      errs.postcode = 'Enter a valid postcode'
     }
     setQuoteErrors(errs)
     if (Object.keys(errs).length > 0) return
@@ -107,7 +107,7 @@ export function HomePage() {
         <div className="block md:hidden w-full h-[280px] overflow-hidden flex-shrink-0">
           <img
             src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1200"
-            alt="Composite door installed on a West Yorkshire home"
+            alt="Composite door installed on a residential home"
             className="w-full h-full object-cover"
           />
         </div>
@@ -115,7 +115,7 @@ export function HomePage() {
         {/* Left: content */}
         <div className="bg-brand flex flex-col justify-center px-8 py-16 md:px-12 md:py-20 w-full md:w-[55%]">
           <p className="font-mono text-xs text-paper opacity-70 uppercase tracking-widest mb-6">
-            West Yorkshire · No Salesperson · Transparent Pricing
+            No Salesperson · Transparent Pricing · One Vetted Installer
           </p>
 
           <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-paper leading-tight">
@@ -167,7 +167,7 @@ export function HomePage() {
         <div className="hidden md:block w-[45%] overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1200"
-            alt="Composite door installed on a West Yorkshire home"
+            alt="Composite door installed on a residential home"
             className="w-full h-full object-cover"
           />
         </div>
@@ -328,7 +328,7 @@ export function HomePage() {
                 </span>
               </div>
               <p className="font-sans text-paper opacity-60 text-sm mt-4">
-                Based on standard West Yorkshire installation. Your surveyor confirms before any
+                Based on standard installation costs. Your surveyor confirms before any
                 work begins.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
@@ -427,7 +427,7 @@ export function HomePage() {
               {
                 n: '02',
                 heading: 'Submit your survey request',
-                body: 'Tell us your address and confirm your specification. We match you with one vetted local installer in West Yorkshire within 24 hours.',
+                body: 'Tell us your address and confirm your specification. We match you with one vetted local installer within 24 hours.',
               },
               {
                 n: '03',
@@ -548,7 +548,7 @@ export function HomePage() {
             <div>
               <p className="font-mono text-3xl text-paper">4</p>
               <p className="font-sans text-sm text-paper opacity-70 mt-1">
-                Vetted West Yorkshire installers
+                Vetted local installers
               </p>
             </div>
             <div>
@@ -566,7 +566,7 @@ export function HomePage() {
             What our customers say
           </h2>
           <p className="font-sans text-paper opacity-60 text-center mb-12">
-            Real homeowners. Real jobs. West Yorkshire.
+            Real homeowners. Real jobs.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -616,7 +616,7 @@ export function HomePage() {
             What our installers say
           </h2>
           <p className="font-sans text-ink-muted text-center mb-12 max-w-xl mx-auto">
-            We work with a small group of vetted West Yorkshire installers. Here is what they think.
+            We work with a small group of vetted independent installers. Here is what they think.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -388,7 +388,7 @@ export function ProductDetailPage() {
             <div className="aspect-square bg-surface overflow-hidden mb-4">
               <img
                 src={product.imageUrl}
-                alt={`${product.name} installed in West Yorkshire`}
+                alt={`${product.name} installed in a residential home`}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -702,10 +702,10 @@ export function ProductDetailPage() {
             <h2 className="font-display text-2xl text-ink mb-6">About {product.name.toLowerCase()}</h2>
             <div className="space-y-4 max-w-prose">
               <p className="font-sans text-base text-ink leading-relaxed">
-                {product.name} are one of the most popular choices for West Yorkshire homes. They combine reliable thermal performance with a clean aesthetic that suits a wide range of property styles, from Victorian terraces to modern new builds.
+                {product.name} are one of the most popular choices for UK homes. They combine reliable thermal performance with a clean aesthetic that suits a wide range of property styles, from Victorian terraces to modern new builds.
               </p>
               <p className="font-sans text-base text-ink leading-relaxed">
-                The price shown is an indicative installed price based on standard conditions for West Yorkshire. It includes supply of the unit to your specification, removal of your existing {product.category === 'windows' ? 'window' : 'door'}, professional installation by a FENSA-registered fitter, and all finishing work.
+                The price shown is an indicative installed price based on standard installation conditions. It includes supply of the unit to your specification, removal of your existing {product.category === 'windows' ? 'window' : 'door'}, professional installation by a FENSA-registered fitter, and all finishing work.
               </p>
               <p className="font-sans text-base text-ink leading-relaxed">
                 A surveyor will visit to confirm your exact measurements before any work begins. In the majority of straightforward jobs, the final price matches what you see here. If anything non-standard is identified, your surveyor will explain it clearly and in writing before any work is agreed.
