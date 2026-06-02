@@ -107,7 +107,7 @@ export function HomePage() {
         <div className="block md:hidden w-full h-[280px] overflow-hidden flex-shrink-0">
           <img
             src="https://res.cloudinary.com/dw0wt42ns/image/upload/v1780422068/hero-splash_xnswmo.jpg"
-            alt="Composite door installed on a residential home"
+            alt="New windows and doors installed on a detached house"
             className="w-full h-full object-cover"
           />
         </div>
