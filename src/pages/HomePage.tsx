@@ -145,7 +145,7 @@ export function HomePage() {
               className="text-paper border border-paper border-opacity-60 hover:border-opacity-100"
               onClick={() => navigate('/quick-quote')}
             >
-              Shop the range
+              Get a quick quote
             </Button>
           </div>
 
