@@ -178,7 +178,7 @@ export function HomePage() {
               <div>
                 <p className="font-display text-xl text-ink">Do we cover your area?</p>
                 <p className="font-sans text-sm text-ink-muted mt-1">
-                  Currently serving West Yorkshire
+                  Currently serving West Yorkshire, South Yorkshire, East Yorkshire, North Yorkshire, Lancashire and Manchester.
                 </p>
               </div>
               <div className="flex gap-3 sm:ml-auto items-end">
