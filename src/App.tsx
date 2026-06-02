@@ -21,6 +21,7 @@ import { BlogPage } from './pages/BlogPage'
 import { BlogPostPage } from './pages/BlogPostPage'
 import { ContactPage } from './pages/ContactPage'
 import { PricingDebugPage } from './pages/PricingDebugPage'
+import { InstallerPricingTool } from './pages/InstallerPricingTool'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 function ScrollToTop() {
@@ -55,6 +56,7 @@ export function App() {
         <Route path="/design-system" element={<DesignSystem />} />
         {/* DEV ONLY — remove before launch */}
         <Route path="/pricing-debug" element={<PricingDebugPage />} />
+        <Route path="/installer" element={<InstallerPricingTool />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
