@@ -115,7 +115,7 @@ export function HomePage() {
         {/* Left: content */}
         <div className="bg-brand flex flex-col justify-center px-8 py-16 md:px-12 md:py-20 w-full md:w-[55%]">
           <p className="font-mono text-xs text-paper opacity-70 uppercase tracking-widest mb-6">
-            No Salesperson · Transparent Pricing · One Vetted Installer
+            No Salesperson · Transparent Pricing · One Installer
           </p>
 
           <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-paper leading-tight">
