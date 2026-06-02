@@ -12,9 +12,11 @@ import {
   usePricingData,
 } from '../pricing'
 import type { WindowQuoteInput, DoorQuoteInput } from '../pricing'
+import { useAuth } from '../contexts/AuthContext'
 
 export function PricingDebugPage() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
   const { windows: windowData, doors: doorData, loading, error: pricingError } = usePricingData()
 
   // ── Window calculator state ──────────────────────────────────────
@@ -109,9 +111,14 @@ export function PricingDebugPage() {
               Development tool. Remove this route before launch.
             </p>
           </div>
-          <Button variant="secondary" size="sm" onClick={() => navigate('/pricing-admin')}>
-            Maintain Prices
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" size="sm" onClick={() => navigate('/pricing-admin')}>
+              Maintain Prices
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => signOut().then(() => navigate('/login'))}>
+              Sign out
+            </Button>
+          </div>
         </div>
 
         {/* ── Section 1: Window Band Table ─────────────────────────── */}

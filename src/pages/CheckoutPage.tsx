@@ -94,10 +94,14 @@ export function CheckoutPage() {
       })
 
       if (error) {
-        console.error('Supabase insert error:', error)
+        setSubmitError(true)
+        setLoading(false)
+        return
       }
-    } catch (err) {
-      console.error('Submission error:', err)
+    } catch {
+      setSubmitError(true)
+      setLoading(false)
+      return
     }
 
     clearBasket()

@@ -16,13 +16,13 @@ export type {
   DoorQuoteResult,
 } from './doorPricing'
 
-export function formatPrice(pence: number): string {
+export function formatPrice(pounds: number): string {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: 'GBP',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(pence)
+  }).format(pounds)
 }
 
 export function getPriceRange(basePrice: number): { low: number; high: number } {

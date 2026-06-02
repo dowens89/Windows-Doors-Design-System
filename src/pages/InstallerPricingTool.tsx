@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import {
   calculateWindowPrice,
   calculateDoorPrice,
@@ -416,6 +417,7 @@ function DoorAddonReference({ doorData }: { doorData: DoorPricingData }) {
 
 export function InstallerPricingTool() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
   const { windows: windowData, doors: doorData, loading, error: pricingError } = usePricingData()
   const [activeForm, setActiveForm] = useState<LineType>('window')
   const [lines, setLines] = useState<QuoteLine[]>([])
@@ -470,6 +472,12 @@ export function InstallerPricingTool() {
                 Clear all
               </button>
             )}
+            <button
+              className={btnGhost}
+              onClick={() => signOut().then(() => navigate('/login'))}
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </div>

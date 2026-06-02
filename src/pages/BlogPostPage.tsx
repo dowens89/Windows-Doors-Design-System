@@ -51,6 +51,9 @@ export function BlogPostPage() {
   useSEO({
     title: post ? post.metaTitle : 'Guide | Windows & Doors Online',
     description: post ? post.metaDescription : '',
+    canonical: post
+      ? `https://www.buywindowsanddoors.co.uk/blog/${post.slug}`
+      : undefined,
   })
 
   if (!post) {

@@ -4,6 +4,7 @@ import { Button } from '../components/ds/Button'
 import { Input } from '../components/ds/Input'
 import { Alert } from '../components/ds/Alert'
 import { useSEO } from '../utils/seo'
+import { supabase } from '../lib/supabase'
 
 export function ContactPage() {
   useSEO({
@@ -16,8 +17,10 @@ export function ContactPage() {
   const [message, setMessage] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState(false)
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const newErrors: Record<string, string> = {}
     if (!name.trim()) newErrors.name = 'Required'
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -25,8 +28,28 @@ export function ContactPage() {
     if (!message.trim()) newErrors.message = 'Required'
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
-    console.log('Contact form submission:', { name, email, message })
+
+    setLoading(true)
+    setSubmitError(false)
+
+    try {
+      const { error } = await supabase
+        .from('contact_enquiries')
+        .insert({ name: name.trim(), email: email.trim(), message: message.trim() })
+
+      if (error) {
+        setSubmitError(true)
+        setLoading(false)
+        return
+      }
+    } catch {
+      setSubmitError(true)
+      setLoading(false)
+      return
+    }
+
     setSent(true)
+    setLoading(false)
   }
 
   return (
@@ -73,7 +96,13 @@ export function ContactPage() {
                     <p className="font-sans text-sm text-error mt-1">{errors.message}</p>
                   )}
                 </div>
-                <Button variant="primary" onClick={handleSubmit}>
+                {submitError && (
+                  <Alert
+                    variant="error"
+                    message="Something went wrong. Please email hello@buywindowsanddoors.co.uk directly."
+                  />
+                )}
+                <Button variant="primary" isLoading={loading} onClick={handleSubmit}>
                   Send message
                 </Button>
               </div>

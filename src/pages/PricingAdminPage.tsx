@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, Trash2, Download, Upload, Check } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Download, Upload, Check, LogOut } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ds/Button'
 import { Input } from '../components/ds/Input'
 import { Alert } from '../components/ds/Alert'
@@ -38,6 +39,7 @@ function useToasts() {
 
 export function PricingAdminPage() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
   const { windows, doors, loading, error: pricingError, refetch } = usePricingData()
   const { toasts, success, error: toastError } = useToasts()
   const [tab, setTab] = useState<'windows' | 'doors'>('windows')
@@ -64,13 +66,22 @@ export function PricingAdminPage() {
       <div className="bg-ink text-paper px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate('/pricing-debug')}
-          className="flex items-center gap-1.5 text-sm text-paper/70 hover:text-paper transition-colors"
+          className="flex items-center gap-1.5 text-sm text-paper opacity-70 hover:opacity-100 transition-opacity"
         >
           <ArrowLeft className="w-4 h-4" />
           Debug
         </button>
-        <span className="text-paper/30">/</span>
+        <span className="text-paper opacity-30">/</span>
         <h1 className="font-display text-lg text-paper">Pricing Admin</h1>
+        <div className="ml-auto">
+          <button
+            onClick={() => signOut().then(() => navigate('/login'))}
+            className="flex items-center gap-1.5 text-sm text-paper opacity-70 hover:opacity-100 transition-opacity"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}

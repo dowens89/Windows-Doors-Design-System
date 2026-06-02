@@ -4,6 +4,7 @@ import { Button } from '../components/ds/Button'
 import { Alert } from '../components/ds/Alert'
 import { Input } from '../components/ds/Input'
 import { useSEO } from '../utils/seo'
+import { supabase } from '../lib/supabase'
 
 const towns = [
   'Leeds',
@@ -35,6 +36,33 @@ export function ServiceAreaPage() {
 
   const [interestEmail, setInterestEmail] = useState('')
   const [registered, setRegistered] = useState(false)
+  const [registering, setRegistering] = useState(false)
+  const [registerError, setRegisterError] = useState(false)
+
+  async function handleRegisterInterest() {
+    if (!interestEmail.trim()) return
+    setRegistering(true)
+    setRegisterError(false)
+
+    try {
+      const { error } = await supabase
+        .from('interest_registrations')
+        .insert({ email: interestEmail.trim(), postcode: '' })
+
+      if (error) {
+        setRegisterError(true)
+        setRegistering(false)
+        return
+      }
+    } catch {
+      setRegisterError(true)
+      setRegistering(false)
+      return
+    }
+
+    setRegistered(true)
+    setRegistering(false)
+  }
 
   return (
     <Layout>
@@ -73,22 +101,26 @@ export function ServiceAreaPage() {
               variant="info"
               message="We are expanding. Register your interest and we will let you know when we cover your area."
             />
+            {registerError && (
+              <div className="mt-4">
+                <Alert variant="error" message="Something went wrong. Please try again." />
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <div className="flex-1">
                 <Input
                   label="Email address"
                   type="email"
                   value={interestEmail}
-                  onChange={(e) => setInterestEmail(e.target.value)}
+                  onChange={(e) => { setInterestEmail(e.target.value); setRegisterError(false) }}
                   placeholder="your@email.com"
                 />
               </div>
               <div className="flex items-end">
                 <Button
                   variant="secondary"
-                  onClick={() => {
-                    if (interestEmail) setRegistered(true)
-                  }}
+                  isLoading={registering}
+                  onClick={handleRegisterInterest}
                 >
                   Register Interest
                 </Button>

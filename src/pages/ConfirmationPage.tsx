@@ -102,7 +102,7 @@ export function ConfirmationPage() {
               },
             ].map((step) => (
               <div key={step.n} className="flex gap-6">
-                <span className="font-mono text-xl text-brand flex-shrink-0">{step.n}</span>
+                <span className="font-display text-xl text-brand flex-shrink-0">{step.n}</span>
                 <div>
                   <h3 className="font-display text-lg text-ink mb-1">{step.heading}</h3>
                   <p className="font-sans text-base text-ink-muted">{step.body}</p>

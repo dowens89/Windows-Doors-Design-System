@@ -437,7 +437,7 @@ export function HomePage() {
             ].map((step, i) => (
               <React.Fragment key={step.n}>
                 <div>
-                  <span className="font-mono text-6xl text-brand opacity-20 leading-none mb-4 block">
+                  <span className="font-display text-6xl text-brand opacity-20 leading-none mb-4 block">
                     {step.n}
                   </span>
                   <h3 className="font-display text-2xl text-ink mb-3">{step.heading}</h3>

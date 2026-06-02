@@ -50,7 +50,7 @@ export function SiteNav() {
           <Link to="/basket" className="relative text-ink-muted hover:text-ink transition-colors">
             <ShoppingBag className="w-6 h-6" strokeWidth={1.5} />
             {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 font-mono text-xs bg-brand text-paper rounded-full w-5 h-5 flex items-center justify-center leading-none">
+              <span className="absolute -top-2 -right-2 font-sans text-xs bg-brand text-paper rounded-full w-5 h-5 flex items-center justify-center leading-none">
                 {itemCount}
               </span>
             )}
@@ -65,7 +65,7 @@ export function SiteNav() {
           <Link to="/basket" className="relative text-ink-muted hover:text-ink transition-colors">
             <ShoppingBag className="w-6 h-6" strokeWidth={1.5} />
             {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 font-mono text-xs bg-brand text-paper rounded-full w-5 h-5 flex items-center justify-center leading-none">
+              <span className="absolute -top-2 -right-2 font-sans text-xs bg-brand text-paper rounded-full w-5 h-5 flex items-center justify-center leading-none">
                 {itemCount}
               </span>
             )}
