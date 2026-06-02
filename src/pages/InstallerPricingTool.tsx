@@ -1,18 +1,18 @@
 import React, { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
-  WINDOW_PRICE_BANDS,
-  WINDOW_ADDONS,
-  DOOR_CATALOGUE,
-  DOOR_ADDONS,
   calculateWindowPrice,
   calculateDoorPrice,
   formatPrice,
+  usePricingData,
 } from '../pricing'
 import type {
   WindowQuoteInput,
   WindowQuoteResult,
   DoorQuoteInput,
   DoorQuoteResult,
+  WindowPricingData,
+  DoorPricingData,
 } from '../pricing'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -43,29 +43,9 @@ function uid() {
   return Math.random().toString(36).slice(2, 9)
 }
 
-const BAND_ENTRIES = Object.entries(WINDOW_PRICE_BANDS)
-  .map(([k, v]) => ({ band: parseInt(k, 10), price: v }))
-  .sort((a, b) => a.band - b.band)
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
-const ALL_SKUS = DOOR_CATALOGUE.flatMap((r) =>
-  r.variants.map((v) => ({
-    skuId: v.skuId,
-    display: `${v.skuId} — ${r.rangeName} (${v.variantType})`,
-    rangeName: r.rangeName,
-    variantType: v.variantType,
-    basePrice: v.sellingPrice,
-  }))
-)
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function Field({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-[11px] font-semibold uppercase tracking-widest text-slate-400 mb-1">
@@ -88,7 +68,13 @@ const btnGhost =
 
 // ─── Window Form ──────────────────────────────────────────────────────────────
 
-function WindowForm({ onAdd }: { onAdd: (line: WindowLine) => void }) {
+function WindowForm({
+  windowData,
+  onAdd,
+}: {
+  windowData: WindowPricingData
+  onAdd: (line: WindowLine) => void
+}) {
   const [width, setWidth] = useState('')
   const [height, setHeight] = useState('')
   const [openers, setOpeners] = useState('0')
@@ -120,10 +106,9 @@ function WindowForm({ onAdd }: { onAdd: (line: WindowLine) => void }) {
         georgianBar,
         flushCasement,
       }
-      const result = calculateWindowPrice(input)
+      const result = calculateWindowPrice(input, windowData)
       const label = `Window ${w}×${h}mm${openers !== '0' ? ` ${openers}op` : ''} / ${colour}`
       onAdd({ id: uid(), type: 'window', label, input, result })
-      // reset
       setWidth('')
       setHeight('')
       setOpeners('0')
@@ -142,81 +127,44 @@ function WindowForm({ onAdd }: { onAdd: (line: WindowLine) => void }) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <Field label="Width (mm)">
-          <input
-            className={inputCls}
-            type="number"
-            placeholder="e.g. 900"
-            value={width}
-            onChange={(e) => setWidth(e.target.value)}
-          />
+          <input className={inputCls} type="number" placeholder="e.g. 900" value={width} onChange={(e) => setWidth(e.target.value)} />
         </Field>
         <Field label="Height (mm)">
-          <input
-            className={inputCls}
-            type="number"
-            placeholder="e.g. 1200"
-            value={height}
-            onChange={(e) => setHeight(e.target.value)}
-          />
+          <input className={inputCls} type="number" placeholder="e.g. 1200" value={height} onChange={(e) => setHeight(e.target.value)} />
         </Field>
         <Field label="Openers">
-          <input
-            className={inputCls}
-            type="number"
-            min="0"
-            max="6"
-            value={openers}
-            onChange={(e) => setOpeners(e.target.value)}
-          />
+          <input className={inputCls} type="number" min="0" max="6" value={openers} onChange={(e) => setOpeners(e.target.value)} />
         </Field>
         <Field label="Bay poles">
-          <input
-            className={inputCls}
-            type="number"
-            min="0"
-            max="4"
-            value={bayPoles}
-            onChange={(e) => setBayPoles(e.target.value)}
-          />
+          <input className={inputCls} type="number" min="0" max="4" value={bayPoles} onChange={(e) => setBayPoles(e.target.value)} />
         </Field>
       </div>
 
       <Field label="Colour">
-        <select
-          className={selectCls}
-          value={colour}
-          onChange={(e) => setColour(e.target.value as typeof colour)}
-        >
+        <select className={selectCls} value={colour} onChange={(e) => setColour(e.target.value as typeof colour)}>
           <option value="white">White — no uplift</option>
-          <option value="standard">Standard colour — +20%</option>
-          <option value="premium">Premium colour — +30%</option>
+          <option value="standard">Standard colour — +{Math.round((windowData.colourUplifts.standard ?? 0.2) * 100)}%</option>
+          <option value="premium">Premium colour — +{Math.round((windowData.colourUplifts.premium ?? 0.3) * 100)}%</option>
         </select>
       </Field>
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-1">
         {(
           [
-            ['midRail', 'Mid rail (+£20)', midRail, setMidRail],
-            ['leading', 'Leading (+£50)', leading, setLeading],
-            ['georgianBar', 'Georgian bar (+£50)', georgianBar, setGeorgianBar],
-            ['flushCasement', 'Flush casement (+£363)', flushCasement, setFlushCasement],
+            ['midRail', `Mid rail (+£${windowData.addons.mid_rail ?? 20})`, midRail, setMidRail],
+            ['leading', `Leading (+£${windowData.addons.leading ?? 50})`, leading, setLeading],
+            ['georgianBar', `Georgian bar (+£${windowData.addons.georgian_bar ?? 50})`, georgianBar, setGeorgianBar],
+            ['flushCasement', `Flush casement (+£${windowData.addons.flush_casement ?? 363})`, flushCasement, setFlushCasement],
           ] as const
         ).map(([key, label, val, set]) => (
           <label key={key} className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-            <input
-              type="checkbox"
-              className={checkCls}
-              checked={val as boolean}
-              onChange={(e) => (set as (v: boolean) => void)(e.target.checked)}
-            />
+            <input type="checkbox" className={checkCls} checked={val as boolean} onChange={(e) => (set as (v: boolean) => void)(e.target.checked)} />
             {label}
           </label>
         ))}
       </div>
 
-      {error && (
-        <p className="text-xs text-amber-400 font-mono">{error}</p>
-      )}
+      {error && <p className="text-xs text-amber-400 font-mono">{error}</p>}
 
       <button className={btnPrimary} onClick={handleAdd}>
         Add window to list
@@ -227,8 +175,24 @@ function WindowForm({ onAdd }: { onAdd: (line: WindowLine) => void }) {
 
 // ─── Door Form ────────────────────────────────────────────────────────────────
 
-function DoorForm({ onAdd }: { onAdd: (line: DoorLine) => void }) {
-  const [skuId, setSkuId] = useState('CD-08')
+function DoorForm({
+  doorData,
+  onAdd,
+}: {
+  doorData: DoorPricingData
+  onAdd: (line: DoorLine) => void
+}) {
+  const allSkus = doorData.catalogue.flatMap((r) =>
+    r.variants.map((v) => ({
+      skuId: v.skuId,
+      display: `${v.skuId} — ${r.rangeName} (${v.variantType})`,
+      rangeName: r.rangeName,
+      variantType: v.variantType,
+      basePrice: v.sellingPrice,
+    }))
+  )
+
+  const [skuId, setSkuId] = useState(allSkus[0]?.skuId ?? 'CD-08')
   const [isLarge, setIsLarge] = useState(false)
   const [premiumColour, setPremiumColour] = useState(false)
   const [autoLock, setAutoLock] = useState(false)
@@ -251,13 +215,10 @@ function DoorForm({ onAdd }: { onAdd: (line: DoorLine) => void }) {
         topLight,
         sideLight,
       }
-      const result = calculateDoorPrice(input)
-      const entry = ALL_SKUS.find((s) => s.skuId === skuId)
-      const label = entry
-        ? `${entry.rangeName} (${entry.variantType}) ${skuId}`
-        : skuId
+      const result = calculateDoorPrice(input, doorData)
+      const entry = allSkus.find((s) => s.skuId === skuId)
+      const label = entry ? `${entry.rangeName} (${entry.variantType}) ${skuId}` : skuId
       onAdd({ id: uid(), type: 'door', label, input, result })
-      // reset addons but keep SKU
       setIsLarge(false)
       setPremiumColour(false)
       setAutoLock(false)
@@ -270,58 +231,42 @@ function DoorForm({ onAdd }: { onAdd: (line: DoorLine) => void }) {
     }
   }
 
+  const entry = allSkus.find((s) => s.skuId === skuId)
+
   return (
     <div className="space-y-4">
       <Field label="Door SKU">
-        <select
-          className={selectCls}
-          value={skuId}
-          onChange={(e) => setSkuId(e.target.value)}
-        >
-          {ALL_SKUS.map((s) => (
-            <option key={s.skuId} value={s.skuId}>
-              {s.display}
-            </option>
+        <select className={selectCls} value={skuId} onChange={(e) => setSkuId(e.target.value)}>
+          {allSkus.map((s) => (
+            <option key={s.skuId} value={s.skuId}>{s.display}</option>
           ))}
         </select>
       </Field>
 
-      {(() => {
-        const entry = ALL_SKUS.find((s) => s.skuId === skuId)
-        return entry ? (
-          <p className="text-xs text-slate-400 font-mono">
-            Base: {formatPrice(entry.basePrice)}
-          </p>
-        ) : null
-      })()}
+      {entry && (
+        <p className="text-xs text-slate-400 font-mono">Base: {formatPrice(entry.basePrice)}</p>
+      )}
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         {(
           [
-            ['isLarge', 'Large door (+10%)', isLarge, setIsLarge],
-            ['premiumColour', 'Premium colour (+£50)', premiumColour, setPremiumColour],
-            ['autoLock', 'Auto lock (+£100)', autoLock, setAutoLock],
-            ['letterbox', 'Letterbox (+£50)', letterbox, setLetterbox],
-            ['knocker', 'Knocker (+£50)', knocker, setKnocker],
-            ['topLight', 'Top light (+£50)', topLight, setTopLight],
-            ['sideLight', 'Side light (+£100)', sideLight, setSideLight],
+            ['isLarge', `Large door (+${Math.round(doorData.largeDoorUplift * 100)}%)`, isLarge, setIsLarge],
+            ['premiumColour', `Premium colour (+£${doorData.addons.premium_colour ?? 50})`, premiumColour, setPremiumColour],
+            ['autoLock', `Auto lock (+£${doorData.addons.auto_lock ?? 100})`, autoLock, setAutoLock],
+            ['letterbox', `Letterbox (+£${doorData.addons.letterbox ?? 50})`, letterbox, setLetterbox],
+            ['knocker', `Knocker (+£${doorData.addons.knocker ?? 50})`, knocker, setKnocker],
+            ['topLight', `Top light (+£${doorData.addons.top_light ?? 50})`, topLight, setTopLight],
+            ['sideLight', `Side light (+£${doorData.addons.side_light ?? 100})`, sideLight, setSideLight],
           ] as const
         ).map(([key, label, val, set]) => (
           <label key={key} className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-            <input
-              type="checkbox"
-              className={checkCls}
-              checked={val as boolean}
-              onChange={(e) => (set as (v: boolean) => void)(e.target.checked)}
-            />
+            <input type="checkbox" className={checkCls} checked={val as boolean} onChange={(e) => (set as (v: boolean) => void)(e.target.checked)} />
             {label}
           </label>
         ))}
       </div>
 
-      {error && (
-        <p className="text-xs text-amber-400 font-mono">{error}</p>
-      )}
+      {error && <p className="text-xs text-amber-400 font-mono">{error}</p>}
 
       <button className={btnPrimary} onClick={handleAdd}>
         Add door to list
@@ -332,15 +277,7 @@ function DoorForm({ onAdd }: { onAdd: (line: DoorLine) => void }) {
 
 // ─── Quote Line Row ───────────────────────────────────────────────────────────
 
-function QuoteLineRow({
-  line,
-  index,
-  onRemove,
-}: {
-  line: QuoteLine
-  index: number
-  onRemove: (id: string) => void
-}) {
+function QuoteLineRow({ line, index, onRemove }: { line: QuoteLine; index: number; onRemove: (id: string) => void }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -350,34 +287,21 @@ function QuoteLineRow({
           <span className="text-[10px] font-mono text-slate-500 w-5 shrink-0">
             {String(index + 1).padStart(2, '0')}
           </span>
-          <span
-            className={`text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded ${
-              line.type === 'window'
-                ? 'bg-sky-900 text-sky-300'
-                : 'bg-amber-900 text-amber-300'
-            }`}
-          >
+          <span className={`text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded ${
+            line.type === 'window' ? 'bg-sky-900 text-sky-300' : 'bg-amber-900 text-amber-300'
+          }`}>
             {line.type}
           </span>
           <span className="font-mono text-sm text-slate-200 truncate">{line.label}</span>
         </div>
         <div className="flex items-center gap-4 shrink-0 ml-4">
           <span className="font-mono text-base font-semibold text-white">
-            {line.type === 'window'
-              ? formatPrice(line.result.totalPriceRounded)
-              : formatPrice(line.result.totalPriceRounded)}
+            {formatPrice(line.result.totalPriceRounded)}
           </span>
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="text-xs text-slate-400 hover:text-slate-200 transition-colors font-mono"
-          >
+          <button onClick={() => setOpen((o) => !o)} className="text-xs text-slate-400 hover:text-slate-200 transition-colors font-mono">
             {open ? '▲ hide' : '▼ detail'}
           </button>
-          <button
-            onClick={() => onRemove(line.id)}
-            className="text-xs text-slate-500 hover:text-red-400 transition-colors font-mono"
-            aria-label="Remove line"
-          >
+          <button onClick={() => onRemove(line.id)} className="text-xs text-slate-500 hover:text-red-400 transition-colors font-mono" aria-label="Remove line">
             ✕
           </button>
         </div>
@@ -387,46 +311,24 @@ function QuoteLineRow({
         <div className="px-4 py-3 bg-slate-900 border-t border-slate-700 font-mono text-xs text-slate-400 space-y-0.5">
           {line.type === 'window' ? (
             <>
-              <p>
-                {line.result.input.widthMm}mm × {line.result.input.heightMm}mm ={' '}
-                {line.result.combinedMm}mm combined → band {line.result.band}mm
-              </p>
+              <p>{line.result.input.widthMm}mm × {line.result.input.heightMm}mm = {line.result.combinedMm}mm combined → band {line.result.band}mm</p>
               <p>Base: {formatPrice(line.result.basePrice)}</p>
-              {line.result.addons.map((a, i) => (
-                <p key={i}>
-                  + {a.label}: {formatPrice(a.amount)}
-                </p>
-              ))}
+              {line.result.addons.map((a, i) => <p key={i}>+ {a.label}: {formatPrice(a.amount)}</p>)}
               <p>Subtotal: {formatPrice(line.result.subtotal)}</p>
               {line.result.colourUpliftPct > 0 && (
-                <p>
-                  + Colour {(line.result.colourUpliftPct * 100).toFixed(0)}%:{' '}
-                  {formatPrice(line.result.colourUpliftAmount)}
-                </p>
+                <p>+ Colour {(line.result.colourUpliftPct * 100).toFixed(0)}%: {formatPrice(line.result.colourUpliftAmount)}</p>
               )}
-              <p className="text-slate-200 pt-1">
-                Total: {formatPrice(line.result.totalPriceRounded)}
-              </p>
+              <p className="text-slate-200 pt-1">Total: {formatPrice(line.result.totalPriceRounded)}</p>
             </>
           ) : (
             <>
-              <p>
-                {line.result.skuId} — {line.result.rangeName} ({line.result.variantType})
-              </p>
+              <p>{line.result.skuId} — {line.result.rangeName} ({line.result.variantType})</p>
               <p>Base: {formatPrice(line.result.basePrice)}</p>
-              {line.result.addons.map((a, i) => (
-                <p key={i}>
-                  + {a.label}: {formatPrice(a.amount)}
-                </p>
-              ))}
+              {line.result.addons.map((a, i) => <p key={i}>+ {a.label}: {formatPrice(a.amount)}</p>)}
               {line.result.largeDoorUpliftAmount > 0 && (
-                <p>
-                  + Large door (+10%): {formatPrice(line.result.largeDoorUpliftAmount)}
-                </p>
+                <p>+ Large door uplift: {formatPrice(line.result.largeDoorUpliftAmount)}</p>
               )}
-              <p className="text-slate-200 pt-1">
-                Total: {formatPrice(line.result.totalPriceRounded)}
-              </p>
+              <p className="text-slate-200 pt-1">Total: {formatPrice(line.result.totalPriceRounded)}</p>
             </>
           )}
         </div>
@@ -435,16 +337,21 @@ function QuoteLineRow({
   )
 }
 
-// ─── Band Reference Panel ─────────────────────────────────────────────────────
+// ─── Reference Panels ─────────────────────────────────────────────────────────
 
-function BandReference() {
+function BandReference({ windowData }: { windowData: WindowPricingData }) {
   const [open, setOpen] = useState(false)
+
+  const bandEntries = Object.entries(windowData.bands)
+    .map(([k, v]) => ({ band: parseInt(k, 10), price: v }))
+    .sort((a, b) => a.band - b.band)
+
+  const stdPct = windowData.colourUplifts.standard ?? 0.2
+  const premPct = windowData.colourUplifts.premium ?? 0.3
+
   return (
     <div className="border border-slate-700 rounded overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between px-4 py-3 bg-slate-800 text-sm text-slate-300 hover:text-white transition-colors"
-        onClick={() => setOpen((o) => !o)}
-      >
+      <button className="w-full flex items-center justify-between px-4 py-3 bg-slate-800 text-sm text-slate-300 hover:text-white transition-colors" onClick={() => setOpen((o) => !o)}>
         <span className="font-semibold">Window band reference</span>
         <span className="font-mono text-slate-500">{open ? '▲' : '▼'}</span>
       </button>
@@ -455,42 +362,29 @@ function BandReference() {
               <tr className="border-b border-slate-800">
                 <th className="text-left px-4 py-2 text-slate-500">Combined</th>
                 <th className="text-right px-4 py-2 text-slate-500">Base price</th>
-                <th className="text-right px-4 py-2 text-slate-500">+20% std</th>
-                <th className="text-right px-4 py-2 text-slate-500">+30% prem</th>
+                <th className="text-right px-4 py-2 text-slate-500">+{Math.round(stdPct * 100)}% std</th>
+                <th className="text-right px-4 py-2 text-slate-500">+{Math.round(premPct * 100)}% prem</th>
               </tr>
             </thead>
             <tbody>
-              {BAND_ENTRIES.map(({ band, price }, i) => (
-                <tr
-                  key={band}
-                  className={`border-b border-slate-800 last:border-0 ${
-                    i % 2 === 0 ? '' : 'bg-slate-800/30'
-                  }`}
-                >
+              {bandEntries.map(({ band, price }, i) => (
+                <tr key={band} className={`border-b border-slate-800 last:border-0 ${i % 2 === 0 ? '' : 'bg-slate-800/30'}`}>
                   <td className="px-4 py-1.5 text-slate-300">{band}mm</td>
-                  <td className="px-4 py-1.5 text-right text-slate-300">
-                    {formatPrice(price)}
-                  </td>
-                  <td className="px-4 py-1.5 text-right text-slate-400">
-                    {formatPrice(Math.round(price * 1.2))}
-                  </td>
-                  <td className="px-4 py-1.5 text-right text-slate-400">
-                    {formatPrice(Math.round(price * 1.3))}
-                  </td>
+                  <td className="px-4 py-1.5 text-right text-slate-300">{formatPrice(price)}</td>
+                  <td className="px-4 py-1.5 text-right text-slate-400">{formatPrice(Math.round(price * (1 + stdPct)))}</td>
+                  <td className="px-4 py-1.5 text-right text-slate-400">{formatPrice(Math.round(price * (1 + premPct)))}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           <div className="px-4 py-3 border-t border-slate-800 text-[10px] text-slate-500 font-mono space-y-0.5">
-            <p>Opener: +£{WINDOW_ADDONS.opener} each</p>
-            <p>Bay pole: +£{WINDOW_ADDONS.bay_pole} each</p>
-            <p>Mid rail: +£{WINDOW_ADDONS.mid_rail}</p>
-            <p>Leading: +£{WINDOW_ADDONS.leading}</p>
-            <p>Georgian bar: +£{WINDOW_ADDONS.georgian_bar}</p>
-            <p>Flush casement: +£{WINDOW_ADDONS.flush_casement}</p>
-            <p className="pt-1 text-slate-600">
-              Colour uplift applied after all flat add-ons.
-            </p>
+            <p>Opener: +£{windowData.addons.opener ?? 242} each</p>
+            <p>Bay pole: +£{windowData.addons.bay_pole ?? 242} each</p>
+            <p>Mid rail: +£{windowData.addons.mid_rail ?? 20}</p>
+            <p>Leading: +£{windowData.addons.leading ?? 50}</p>
+            <p>Georgian bar: +£{windowData.addons.georgian_bar ?? 50}</p>
+            <p>Flush casement: +£{windowData.addons.flush_casement ?? 363}</p>
+            <p className="pt-1 text-slate-600">Colour uplift applied after all flat add-ons.</p>
           </div>
         </div>
       )}
@@ -498,27 +392,20 @@ function BandReference() {
   )
 }
 
-function DoorAddonReference() {
+function DoorAddonReference({ doorData }: { doorData: DoorPricingData }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="border border-slate-700 rounded overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between px-4 py-3 bg-slate-800 text-sm text-slate-300 hover:text-white transition-colors"
-        onClick={() => setOpen((o) => !o)}
-      >
+      <button className="w-full flex items-center justify-between px-4 py-3 bg-slate-800 text-sm text-slate-300 hover:text-white transition-colors" onClick={() => setOpen((o) => !o)}>
         <span className="font-semibold">Door add-on reference</span>
         <span className="font-mono text-slate-500">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
         <div className="bg-slate-900 border-t border-slate-700 px-4 py-3 font-mono text-xs text-slate-400 space-y-0.5">
-          {Object.entries(DOOR_ADDONS).map(([k, v]) => (
-            <p key={k}>
-              {k.replace(/_/g, ' ')}: {v > 0 ? `+£${v}` : 'included'}
-            </p>
+          {Object.entries(doorData.addons).map(([k, v]) => (
+            <p key={k}>{k.replace(/_/g, ' ')}: {v > 0 ? `+£${v}` : 'included'}</p>
           ))}
-          <p className="pt-1 text-slate-600">
-            Large door: +10% applied after all flat add-ons.
-          </p>
+          <p className="pt-1 text-slate-600">Large door: +{Math.round(doorData.largeDoorUplift * 100)}% applied after all flat add-ons.</p>
         </div>
       )}
     </div>
@@ -528,6 +415,8 @@ function DoorAddonReference() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export function InstallerPricingTool() {
+  const navigate = useNavigate()
+  const { windows: windowData, doors: doorData, loading, error: pricingError } = usePricingData()
   const [activeForm, setActiveForm] = useState<LineType>('window')
   const [lines, setLines] = useState<QuoteLine[]>([])
 
@@ -543,6 +432,22 @@ export function InstallerPricingTool() {
   const windowCount = lines.filter((l) => l.type === 'window').length
   const doorCount = lines.filter((l) => l.type === 'door').length
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <p className="font-mono text-sm text-slate-400">Loading pricing data…</p>
+      </div>
+    )
+  }
+
+  if (pricingError || !windowData || !doorData) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-8">
+        <p className="font-mono text-sm text-amber-400">{pricingError ?? 'Pricing data unavailable'}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Header */}
@@ -556,14 +461,16 @@ export function InstallerPricingTool() {
               Installer Pricing Tool
             </h1>
           </div>
-          {lines.length > 0 && (
-            <button
-              className={btnGhost}
-              onClick={() => setLines([])}
-            >
-              Clear all lines
+          <div className="flex items-center gap-3">
+            <button className={btnGhost} onClick={() => navigate('/pricing-admin')}>
+              Pricing admin
             </button>
-          )}
+            {lines.length > 0 && (
+              <button className={btnGhost} onClick={() => setLines([])}>
+                Clear all
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -579,9 +486,7 @@ export function InstallerPricingTool() {
                   key={t}
                   onClick={() => setActiveForm(t)}
                   className={`flex-1 py-2.5 text-sm font-semibold transition-colors focus:outline-none ${
-                    activeForm === t
-                      ? 'bg-sky-700 text-white'
-                      : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                    activeForm === t ? 'bg-sky-700 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   {t === 'window' ? 'Window' : 'Door'}
@@ -592,16 +497,16 @@ export function InstallerPricingTool() {
             {/* Active form */}
             <div className="bg-slate-900 border border-slate-700 rounded p-5">
               {activeForm === 'window' ? (
-                <WindowForm onAdd={addLine} />
+                <WindowForm windowData={windowData} onAdd={addLine} />
               ) : (
-                <DoorForm onAdd={addLine} />
+                <DoorForm doorData={doorData} onAdd={addLine} />
               )}
             </div>
 
             {/* Reference panels */}
             <div className="space-y-2">
-              <BandReference />
-              <DoorAddonReference />
+              <BandReference windowData={windowData} />
+              <DoorAddonReference doorData={doorData} />
             </div>
           </div>
 
@@ -612,16 +517,8 @@ export function InstallerPricingTool() {
               <div className="font-mono text-xs text-slate-400 space-y-0.5">
                 <p>
                   {lines.length} line{lines.length !== 1 ? 's' : ''}
-                  {windowCount > 0 && (
-                    <span className="ml-2 text-sky-400">
-                      {windowCount}W
-                    </span>
-                  )}
-                  {doorCount > 0 && (
-                    <span className="ml-2 text-amber-400">
-                      {doorCount}D
-                    </span>
-                  )}
+                  {windowCount > 0 && <span className="ml-2 text-sky-400">{windowCount}W</span>}
+                  {doorCount > 0 && <span className="ml-2 text-amber-400">{doorCount}D</span>}
                 </p>
               </div>
               <div className="text-right">
@@ -637,19 +534,12 @@ export function InstallerPricingTool() {
             {/* Lines */}
             {lines.length === 0 ? (
               <div className="border border-slate-800 border-dashed rounded px-6 py-12 text-center">
-                <p className="font-mono text-sm text-slate-600">
-                  No lines yet. Add a window or door above.
-                </p>
+                <p className="font-mono text-sm text-slate-600">No lines yet. Add a window or door above.</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {lines.map((line, i) => (
-                  <QuoteLineRow
-                    key={line.id}
-                    line={line}
-                    index={i}
-                    onRemove={removeLine}
-                  />
+                  <QuoteLineRow key={line.id} line={line} index={i} onRemove={removeLine} />
                 ))}
               </div>
             )}
@@ -659,23 +549,11 @@ export function InstallerPricingTool() {
               <div className="bg-slate-900 border border-slate-700 rounded px-5 py-4 font-mono text-xs space-y-1">
                 <div className="flex justify-between text-slate-400">
                   <span>Windows ({windowCount})</span>
-                  <span>
-                    {formatPrice(
-                      lines
-                        .filter((l) => l.type === 'window')
-                        .reduce((s, l) => s + l.result.totalPriceRounded, 0)
-                    )}
-                  </span>
+                  <span>{formatPrice(lines.filter((l) => l.type === 'window').reduce((s, l) => s + l.result.totalPriceRounded, 0))}</span>
                 </div>
                 <div className="flex justify-between text-slate-400">
                   <span>Doors ({doorCount})</span>
-                  <span>
-                    {formatPrice(
-                      lines
-                        .filter((l) => l.type === 'door')
-                        .reduce((s, l) => s + l.result.totalPriceRounded, 0)
-                    )}
-                  </span>
+                  <span>{formatPrice(lines.filter((l) => l.type === 'door').reduce((s, l) => s + l.result.totalPriceRounded, 0))}</span>
                 </div>
                 <div className="flex justify-between text-white pt-1 border-t border-slate-700">
                   <span>Total</span>

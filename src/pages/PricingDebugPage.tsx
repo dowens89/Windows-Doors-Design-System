@@ -1,18 +1,22 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 import { Input } from '../components/ds/Input'
 import { Button } from '../components/ds/Button'
 import { Alert } from '../components/ds/Alert'
+import { Loading } from '../components/ds/Loading'
 import {
-  WINDOW_PRICE_BANDS,
-  DOOR_CATALOGUE,
   calculateWindowPrice,
   calculateDoorPrice,
   formatPrice,
+  usePricingData,
 } from '../pricing'
 import type { WindowQuoteInput, DoorQuoteInput } from '../pricing'
 
 export function PricingDebugPage() {
+  const navigate = useNavigate()
+  const { windows: windowData, doors: doorData, loading, error: pricingError } = usePricingData()
+
   // ── Window calculator state ──────────────────────────────────────
   const [wWidth, setWWidth] = useState('500')
   const [wHeight, setWHeight] = useState('500')
@@ -22,6 +26,7 @@ export function PricingDebugPage() {
   const [wError, setWError] = useState<string | null>(null)
 
   function runWindowCalc() {
+    if (!windowData) return
     setWError(null)
     setWResult(null)
     try {
@@ -31,7 +36,7 @@ export function PricingDebugPage() {
         openers: parseInt(wOpeners, 10) || 0,
         colourType: wColour,
       }
-      setWResult(calculateWindowPrice(input))
+      setWResult(calculateWindowPrice(input, windowData))
     } catch (e) {
       setWError(e instanceof Error ? e.message : String(e))
     }
@@ -46,6 +51,7 @@ export function PricingDebugPage() {
   const [dError, setDError] = useState<string | null>(null)
 
   function runDoorCalc() {
+    if (!doorData) return
     setDError(null)
     setDResult(null)
     try {
@@ -59,28 +65,53 @@ export function PricingDebugPage() {
         knocker: false,
         topLight: false,
       }
-      setDResult(calculateDoorPrice(input))
+      setDResult(calculateDoorPrice(input, doorData))
     } catch (e) {
       setDError(e instanceof Error ? e.message : String(e))
     }
   }
 
-  const bandEntries = Object.entries(WINDOW_PRICE_BANDS)
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center py-32">
+          <Loading />
+        </div>
+      </Layout>
+    )
+  }
+
+  if (pricingError || !windowData || !doorData) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto px-6 md:px-8 py-12">
+          <Alert variant="warning" message={pricingError ?? 'Pricing data unavailable'} />
+        </div>
+      </Layout>
+    )
+  }
+
+  const bandEntries = Object.entries(windowData.bands)
     .map(([k, v]) => ({ band: parseInt(k, 10), price: v }))
     .sort((a, b) => a.band - b.band)
 
-  const allSkus = DOOR_CATALOGUE.flatMap((r) =>
+  const allSkus = doorData.catalogue.flatMap((r) =>
     r.variants.map((v) => ({ skuId: v.skuId, label: `${r.rangeName} — ${v.variantType}` }))
   )
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-6 md:px-8 py-12 space-y-20">
-        <div>
-          <h1 className="font-display text-3xl text-ink mb-2">Pricing Debug</h1>
-          <p className="font-sans text-sm text-ink-muted">
-            Development tool. Remove this route before launch.
-          </p>
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h1 className="font-display text-3xl text-ink mb-2">Pricing Debug</h1>
+            <p className="font-sans text-sm text-ink-muted">
+              Development tool. Remove this route before launch.
+            </p>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => navigate('/pricing-admin')}>
+            Maintain Prices
+          </Button>
         </div>
 
         {/* ── Section 1: Window Band Table ─────────────────────────── */}
@@ -336,7 +367,7 @@ export function PricingDebugPage() {
                 </tr>
               </thead>
               <tbody>
-                {DOOR_CATALOGUE.flatMap((range, ri) =>
+                {doorData.catalogue.flatMap((range, ri) =>
                   range.variants.map((v, vi) => (
                     <tr
                       key={v.skuId}

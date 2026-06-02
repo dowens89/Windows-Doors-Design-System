@@ -10,6 +10,7 @@ import { FAQ } from '../components/ds/FAQ'
 import { PriceDisplay } from '../components/ds/PriceDisplay'
 import { ProductCard } from '../components/ds/ProductCard'
 import { EmptyState } from '../components/ds/EmptyState'
+import { Loading } from '../components/ds/Loading'
 import { useSEO } from '../utils/seo'
 import { productSchema, faqSchema } from '../utils/schema'
 import { products } from '../data/products'
@@ -18,8 +19,9 @@ import { useBasketStore } from '../store/basketStore'
 import {
   calculateWindowPrice,
   calculateDoorPrice,
+  usePricingData,
 } from '../pricing'
-import type { WindowQuoteInput, DoorQuoteInput } from '../pricing'
+import type { WindowQuoteInput, DoorQuoteInput, WindowPricingData, DoorPricingData } from '../pricing'
 
 // Representative default SKU per door product slug
 const PRODUCT_SLUG_TO_SKU: Record<string, string> = {
@@ -62,6 +64,7 @@ function calcWindowEnginePrice(
   selections: Record<string, string>,
   widthMm: number,
   heightMm: number,
+  windowData: WindowPricingData,
 ): PriceState {
   try {
     const colourVariant = product.variants.find((v) => v.type === 'colour')
@@ -88,16 +91,10 @@ function calcWindowEnginePrice(
       ? selections[flushCasementVariant.id] === 'true'
       : false
 
-    const result = calculateWindowPrice({
-      widthMm,
-      heightMm,
-      openers,
-      colourType,
-      midRail,
-      georgianBar,
-      leading,
-      flushCasement,
-    })
+    const result = calculateWindowPrice(
+      { widthMm, heightMm, openers, colourType, midRail, georgianBar, leading, flushCasement },
+      windowData
+    )
     return { value: result.totalPriceRounded, fromEngine: true, error: null }
   } catch (e) {
     return {
@@ -111,6 +108,7 @@ function calcWindowEnginePrice(
 function calcDoorEnginePrice(
   product: Product,
   selections: Record<string, string>,
+  doorData: DoorPricingData,
 ): PriceState {
   const skuId = PRODUCT_SLUG_TO_SKU[product.slug]
   if (!skuId) {
@@ -143,7 +141,7 @@ function calcDoorEnginePrice(
       sideLight,
     }
 
-    const result = calculateDoorPrice(input)
+    const result = calculateDoorPrice(input, doorData)
     return { value: result.totalPriceRounded, fromEngine: true, error: null }
   } catch (e) {
     return {
@@ -158,6 +156,7 @@ export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const addItem = useBasketStore((s) => s.addItem)
+  const { windows: windowData, doors: doorData, loading: pricingLoading } = usePricingData()
 
   const product = products.find((p) => p.slug === slug)
 
@@ -194,19 +193,21 @@ export function ProductDetailPage() {
     const hasMeasurements = widthMm > 0 && heightMm > 0
 
     if (product.category === 'windows') {
-      if (hasMeasurements) {
-        return calcWindowEnginePrice(product, selections, widthMm, heightMm)
+      if (hasMeasurements && windowData) {
+        return calcWindowEnginePrice(product, selections, widthMm, heightMm, windowData)
       }
-      // Fallback: use existing band-based logic via variant priceModifiers
       return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
     }
 
     if (product.category === 'doors') {
-      return calcDoorEnginePrice(product, selections)
+      if (doorData) {
+        return calcDoorEnginePrice(product, selections, doorData)
+      }
+      return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
     }
 
     return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
-  }, [product, selections, measurement, measureUnit])
+  }, [product, selections, measurement, measureUnit, windowData, doorData])
 
   if (!product) {
     return (
@@ -219,6 +220,16 @@ export function ProductDetailPage() {
             actionLabel="Browse all products"
             onAction={() => navigate('/shop')}
           />
+        </div>
+      </Layout>
+    )
+  }
+
+  if (pricingLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center py-32">
+          <Loading />
         </div>
       </Layout>
     )
