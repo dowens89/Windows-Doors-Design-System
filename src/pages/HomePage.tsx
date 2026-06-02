@@ -125,9 +125,10 @@ export function HomePage() {
           </h1>
 
           <p className="font-sans text-lg text-paper opacity-80 mt-6 max-w-md leading-relaxed">
-            We show you honest installed prices for windows and doors online. You choose your
-            specification. We match you with one vetted local installer. No cold calls. No fake
-            discounts. No pressure.
+            We show you honest installed prices for windows and doors online. You choose what you want. We match you with a local installer who will carry out a survey.
+            No cold calls. 
+            No fake discounts. 
+            No pressure.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
