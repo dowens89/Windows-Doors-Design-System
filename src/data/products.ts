@@ -9,7 +9,7 @@ export interface ProductVariantOption {
 export interface ProductVariant {
   id: string
   label: string
-  type: 'style' | 'colour' | 'glazing' | 'size' | 'panels' | 'sidePanels'
+  type: 'style' | 'colour' | 'glazing' | 'size' | 'panels' | 'sidePanels' | 'addon'
   options: ProductVariantOption[]
 }
 
@@ -41,7 +41,9 @@ export interface Product {
   }
 }
 
+// FIX 21: 'White handles included as standard' added as first item
 const standardIncluded = [
+  'White handles included as standard',
   'Supply of window unit to your specification',
   'Professional installation by a FENSA-registered installer',
   'Removal and disposal of your existing window',
@@ -50,6 +52,7 @@ const standardIncluded = [
 ]
 
 const doorIncluded = [
+  'White handles included as standard',
   'Supply of composite door to your specification',
   'Professional installation by a FENSA-registered fitter',
   'Removal and disposal of your existing door',
@@ -81,10 +84,6 @@ const fullColours: ProductVariantOption[] = [
   { id: 'cream', label: 'Cream', priceModifier: 0, hex: '#F5F0E0', borderHex: '#CCCCCC' },
 ]
 
-const noChartwellColours: ProductVariantOption[] = fullColours.filter(
-  (c) => c.id !== 'chartwell' && c.id !== 'irish-oak'
-)
-
 const sashColours: ProductVariantOption[] = [
   { id: 'white', label: 'White', priceModifier: 0, hex: '#F0EDE8', borderHex: '#CCCCCC' },
   { id: 'anthracite', label: 'Anthracite Grey', priceModifier: 75, hex: '#3D3D3D' },
@@ -92,12 +91,25 @@ const sashColours: ProductVariantOption[] = [
   { id: 'cream', label: 'Cream', priceModifier: 0, hex: '#F5F0E0', borderHex: '#CCCCCC' },
 ]
 
+// FIX 19: triple glazed removed from standardGlazing
 const standardGlazing: ProductVariantOption[] = [
   { id: 'clear-double', label: 'Clear Double Glazed', priceModifier: 0 },
   { id: 'obscure-double', label: 'Obscure Double Glazed', priceModifier: 50 },
   { id: 'decorative', label: 'Decorative', priceModifier: 150 },
-  { id: 'triple', label: 'Triple Glazed', priceModifier: 200 },
 ]
+
+// FIX 22: openers variant for casement and sash windows
+const windowOpenersVariant: ProductVariant = {
+  id: 'openers',
+  label: 'Opening Lights',
+  type: 'addon',
+  options: [
+    { id: 'no_opener', label: 'Fixed (no opener)', priceModifier: 0 },
+    { id: 'one_opener', label: '1 Opening Light', priceModifier: 242 },
+    { id: 'two_openers', label: '2 Opening Lights', priceModifier: 484 },
+    { id: 'three_openers', label: '3 Opening Lights', priceModifier: 726 },
+  ],
+}
 
 const standardWindowFaqs = (basePrice: number): ProductFAQ[] => [
   {
@@ -154,6 +166,7 @@ const standardDoorFaqs = (basePrice: number): ProductFAQ[] => [
 ]
 
 export const products: Product[] = [
+  // FIX 17: casement windows — style variant removed, no triple glazed, openers added
   {
     id: 'casement-windows',
     slug: 'casement-windows',
@@ -167,16 +180,6 @@ export const products: Product[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?auto=format&fit=crop&q=80&w=800',
     variants: [
-      {
-        id: 'style',
-        label: 'Style',
-        type: 'style',
-        options: [
-          { id: 'standard', label: 'Standard', priceModifier: 0 },
-          { id: 'bay', label: 'Bay Configuration', priceModifier: 350 },
-          { id: 'corner', label: 'Corner Configuration', priceModifier: 500 },
-        ],
-      },
       {
         id: 'colour',
         label: 'Colour',
@@ -195,6 +198,7 @@ export const products: Product[] = [
         type: 'size',
         options: standardSizes,
       },
+      windowOpenersVariant,
     ],
     features: [
       'A-rated energy efficiency',
@@ -213,7 +217,7 @@ export const products: Product[] = [
       },
       ...standardWindowFaqs(450).slice(1),
     ],
-    relatedProductIds: ['sash-windows', 'tilt-turn-windows', 'french-windows'],
+    relatedProductIds: ['sash-windows', 'bay-windows'],
     seo: {
       title: 'Casement Windows Installed West Yorkshire | From £450 | Windows & Doors Online',
       description:
@@ -221,6 +225,7 @@ export const products: Product[] = [
       h1: 'Casement Windows — From £450 Installed',
     },
   },
+  // FIX 19: sash windows — triple glazed removed, openers added
   {
     id: 'sash-windows',
     slug: 'sash-windows',
@@ -265,6 +270,7 @@ export const products: Product[] = [
         type: 'size',
         options: standardSizes,
       },
+      windowOpenersVariant,
     ],
     features: [
       'Authentic sash movement with spring balances',
@@ -282,69 +288,12 @@ export const products: Product[] = [
       },
       ...standardWindowFaqs(650).slice(1),
     ],
-    relatedProductIds: ['casement-windows', 'tilt-turn-windows'],
+    relatedProductIds: ['casement-windows', 'bay-windows'],
     seo: {
       title: 'Sash Windows Installed West Yorkshire | From £650 | Windows & Doors Online',
       description:
         'Replacement sash windows with honest installed prices for West Yorkshire. Traditional style, modern performance. See your price online.',
       h1: 'Sash Windows — From £650 Installed',
-    },
-  },
-  {
-    id: 'tilt-turn-windows',
-    slug: 'tilt-turn-windows',
-    category: 'windows',
-    type: 'Tilt & Turn',
-    name: 'Tilt & Turn Windows',
-    shortDescription:
-      'Versatile dual-action windows that tilt inward for ventilation or open fully for cleaning and emergency egress.',
-    basePrice: 550,
-    unit: 'per window, installed',
-    imageUrl:
-      'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=800',
-    variants: [
-      {
-        id: 'colour',
-        label: 'Colour',
-        type: 'colour',
-        options: noChartwellColours,
-      },
-      {
-        id: 'glazing',
-        label: 'Glazing',
-        type: 'glazing',
-        options: standardGlazing,
-      },
-      {
-        id: 'size',
-        label: 'Size',
-        type: 'size',
-        options: standardSizes,
-      },
-    ],
-    features: [
-      'Dual-action tilt and turn mechanism',
-      'Inward tilt for safe ventilation',
-      'Full open for easy cleaning',
-      'A-rated energy efficiency',
-      'Multi-point locking system',
-    ],
-    included: standardIncluded,
-    potentialVariations: standardVariations,
-    faqs: [
-      {
-        question: 'How much does a tilt and turn window cost installed in West Yorkshire?',
-        answer:
-          'Based on our current pricing, a standard tilt and turn window installed in West Yorkshire starts from £550. Price varies by colour, glazing choice, and size.',
-      },
-      ...standardWindowFaqs(550).slice(1),
-    ],
-    relatedProductIds: ['casement-windows', 'sash-windows', 'bay-windows'],
-    seo: {
-      title: 'Tilt and Turn Windows West Yorkshire | From £550 | Windows & Doors Online',
-      description:
-        'Tilt and turn windows installed in West Yorkshire. Dual-action ventilation and easy cleaning. Honest online prices — no salesperson.',
-      h1: 'Tilt & Turn Windows — From £550 Installed',
     },
   },
   {
@@ -382,7 +331,6 @@ export const products: Product[] = [
         options: [
           { id: 'clear-double', label: 'Clear Double Glazed', priceModifier: 0 },
           { id: 'decorative', label: 'Decorative', priceModifier: 150 },
-          { id: 'triple', label: 'Triple Glazed', priceModifier: 200 },
         ],
       },
       {
@@ -415,7 +363,7 @@ export const products: Product[] = [
       },
       ...standardWindowFaqs(1200).slice(1),
     ],
-    relatedProductIds: ['casement-windows', 'french-windows', 'tilt-turn-windows'],
+    relatedProductIds: ['casement-windows', 'sash-windows'],
     seo: {
       title: 'Bay Windows Installed West Yorkshire | From £1,200 | Windows & Doors Online',
       description:
@@ -423,66 +371,7 @@ export const products: Product[] = [
       h1: 'Bay Windows — From £1,200 Installed',
     },
   },
-  {
-    id: 'french-windows',
-    slug: 'french-windows',
-    category: 'windows',
-    type: 'French',
-    name: 'French Windows',
-    shortDescription:
-      'Full-height glazed doors that open outward to create a seamless connection between inside and outside.',
-    basePrice: 850,
-    unit: 'per pair, installed',
-    imageUrl:
-      'https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=800',
-    variants: [
-      {
-        id: 'colour',
-        label: 'Colour',
-        type: 'colour',
-        options: fullColours,
-      },
-      {
-        id: 'glazing',
-        label: 'Glazing',
-        type: 'glazing',
-        options: standardGlazing,
-      },
-      {
-        id: 'size',
-        label: 'Size',
-        type: 'size',
-        options: [
-          { id: 'standard', label: 'Standard (up to 1200mm wide)', priceModifier: 0 },
-          { id: 'wide', label: 'Wide (1201–1600mm wide)', priceModifier: 200 },
-        ],
-      },
-    ],
-    features: [
-      'Full-height glazing for maximum light',
-      'Outward opening for space efficiency inside',
-      'Multi-point locking system',
-      'A-rated energy efficiency',
-      'Low maintenance uPVC frame',
-    ],
-    included: standardIncluded,
-    potentialVariations: standardVariations,
-    faqs: [
-      {
-        question: 'How much do French windows cost installed in West Yorkshire?',
-        answer:
-          'Based on our current pricing, French windows installed in West Yorkshire start from £850 per pair. Width and glazing choice affect the final price.',
-      },
-      ...standardWindowFaqs(850).slice(1),
-    ],
-    relatedProductIds: ['french-doors', 'bi-fold-doors', 'patio-doors'],
-    seo: {
-      title: 'French Windows Installed West Yorkshire | From £850 | Windows & Doors Online',
-      description:
-        'French windows with honest installed prices for West Yorkshire homes. Full-height glazing, easy access to garden. See your price online.',
-      h1: 'French Windows — From £850 Installed',
-    },
-  },
+  // FIX 23: Double Doors option removed; FIX 13: bi-fold-doors removed from relatedProductIds
   {
     id: 'composite-doors',
     slug: 'composite-doors',
@@ -503,7 +392,6 @@ export const products: Product[] = [
         options: [
           { id: 'single', label: 'Standard Single Door', priceModifier: 0 },
           { id: 'stable', label: 'Stable Door', priceModifier: 150 },
-          { id: 'double', label: 'Double Doors', priceModifier: 400 },
         ],
       },
       {
@@ -689,78 +577,12 @@ export const products: Product[] = [
     included: doorIncluded,
     potentialVariations: standardVariations,
     faqs: standardDoorFaqs(1100),
-    relatedProductIds: ['bi-fold-doors', 'patio-doors', 'composite-doors'],
+    relatedProductIds: ['patio-doors', 'composite-doors'],
     seo: {
       title: 'French Doors Installed West Yorkshire | From £1,100 | Windows & Doors Online',
       description:
         'French doors with transparent installed prices for West Yorkshire. Full glazing, garden access, honest pricing. See your price online.',
       h1: 'French Doors — From £1,100 Installed',
-    },
-  },
-  {
-    id: 'bi-fold-doors',
-    slug: 'bi-fold-doors',
-    category: 'doors',
-    type: 'Bi-Fold',
-    name: 'Bi-Fold Doors',
-    shortDescription:
-      'Create a seamless opening between your home and garden. Available in 3 to 6 panel configurations.',
-    basePrice: 2200,
-    unit: 'installed',
-    imageUrl:
-      'https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&q=80&w=800',
-    variants: [
-      {
-        id: 'panels',
-        label: 'Panels',
-        type: 'panels',
-        options: [
-          { id: '3-panel', label: '3 Panel', priceModifier: 0 },
-          { id: '4-panel', label: '4 Panel', priceModifier: 400 },
-          { id: '5-panel', label: '5 Panel', priceModifier: 800 },
-          { id: '6-panel', label: '6 Panel', priceModifier: 1200 },
-        ],
-      },
-      {
-        id: 'colour',
-        label: 'Colour',
-        type: 'colour',
-        options: [
-          { id: 'white', label: 'White', priceModifier: 0, hex: '#F0EDE8', borderHex: '#CCCCCC' },
-          { id: 'anthracite', label: 'Anthracite Grey', priceModifier: 75, hex: '#3D3D3D' },
-          { id: 'black', label: 'Black', priceModifier: 75, hex: '#1C1C1C' },
-          { id: 'chartwell', label: 'Chartwell Green', priceModifier: 75, hex: '#6B8F71' },
-        ],
-      },
-      {
-        id: 'glazing',
-        label: 'Glazing',
-        type: 'glazing',
-        options: [
-          { id: 'clear', label: 'Clear', priceModifier: 0 },
-          { id: 'tinted', label: 'Tinted', priceModifier: 200 },
-        ],
-      },
-    ],
-    features: [
-      'Folds flat to maximise opening width',
-      '3 to 6 panel configurations',
-      'Slim aluminium sightlines',
-      'Multi-point locking system',
-      'Smooth bottom-rolling track',
-    ],
-    included: doorIncluded,
-    potentialVariations: [
-      ...standardVariations,
-      'Structural opening modification may be required',
-    ],
-    faqs: standardDoorFaqs(2200),
-    relatedProductIds: ['french-doors', 'patio-doors'],
-    seo: {
-      title: 'Bi-Fold Doors Installed West Yorkshire | From £2,200 | Windows & Doors Online',
-      description:
-        'Bi-fold doors with honest installed prices for West Yorkshire. 3 to 6 panel options. Get your price online before anyone visits.',
-      h1: 'Bi-Fold Doors — From £2,200 Installed',
     },
   },
   {
@@ -815,7 +637,7 @@ export const products: Product[] = [
     included: doorIncluded,
     potentialVariations: standardVariations,
     faqs: standardDoorFaqs(950),
-    relatedProductIds: ['bi-fold-doors', 'french-doors'],
+    relatedProductIds: ['french-doors', 'composite-doors'],
     seo: {
       title: 'Patio Doors Installed West Yorkshire | From £950 | Windows & Doors Online',
       description:

@@ -3,6 +3,7 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
   useLocation,
 } from 'react-router-dom'
 import { DesignSystem } from './pages/DesignSystem'
@@ -41,6 +42,9 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/shop/:category" element={<ShopPage />} />
+        <Route path="/windows/tilt-turn-windows" element={<Navigate to="/shop?category=windows" replace />} />
+        <Route path="/windows/french-windows" element={<Navigate to="/shop?category=windows" replace />} />
+        <Route path="/doors/bi-fold-doors" element={<Navigate to="/shop?category=doors" replace />} />
         <Route path="/windows/:slug" element={<ProductDetailPage />} />
         <Route path="/doors/:slug" element={<ProductDetailPage />} />
         <Route path="/quick-quote" element={<QuickQuotePage />} />

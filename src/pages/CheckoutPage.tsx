@@ -100,15 +100,19 @@ export function CheckoutPage() {
       console.error('Submission error:', err)
     }
 
-    clearBasket()
+    const capturedItems = [...items]
+    const capturedTotal = total
+
     navigate('/confirmation', {
       state: {
         reference,
         name: form.name,
-        items,
-        total,
+        items: capturedItems,
+        total: capturedTotal,
+        submitted: true,
       },
     })
+    clearBasket()
     setLoading(false)
   }
 

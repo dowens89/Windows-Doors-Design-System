@@ -42,8 +42,8 @@ function getPageSEO(category: Category) {
   }
 }
 
-const windowTypes = ['Casement', 'Sash', 'Tilt & Turn', 'Bay', 'French']
-const doorTypes = ['Composite', 'uPVC', 'French', 'Bi-Fold', 'Patio']
+const windowTypes = ['Casement', 'Sash', 'Bay']
+const doorTypes = ['Composite', 'uPVC', 'French', 'Patio']
 
 export function ShopPage() {
   const { category: categoryParam } = useParams<{ category?: string }>()
