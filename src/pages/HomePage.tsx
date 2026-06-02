@@ -150,12 +150,7 @@ export function HomePage() {
             </Button>
           </div>
 
-         
-              <div key={text} className="inline-flex items-center gap-2">
-                <Icon className="w-4 h-4 text-paper shrink-0 opacity-80" strokeWidth={1.5} />
-                <span className="font-sans text-sm text-paper opacity-80">{text}</span>
-              </div>
-            ))}
+
           </div>
         </div>
 
