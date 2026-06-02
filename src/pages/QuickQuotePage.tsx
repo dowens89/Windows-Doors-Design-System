@@ -59,8 +59,8 @@ export function QuickQuotePage() {
 
     const w = range(windows * 600)
     const d = range(doors * 750)
-    const c = range(compositeDoors * 1250)
-    const totalMid = windows * 600 + doors * 750 + compositeDoors * 1250
+    const c = range(compositeDoors * 1195)
+    const totalMid = windows * 600 + doors * 750 + compositeDoors * 1195
     const t = range(totalMid)
 
     setResult({

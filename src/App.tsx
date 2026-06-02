@@ -20,6 +20,7 @@ import { ServiceAreaPage } from './pages/ServiceAreaPage'
 import { BlogPage } from './pages/BlogPage'
 import { BlogPostPage } from './pages/BlogPostPage'
 import { ContactPage } from './pages/ContactPage'
+import { PricingDebugPage } from './pages/PricingDebugPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 function ScrollToTop() {
@@ -52,6 +53,8 @@ export function App() {
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/design-system" element={<DesignSystem />} />
+        {/* DEV ONLY — remove before launch */}
+        <Route path="/pricing-debug" element={<PricingDebugPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

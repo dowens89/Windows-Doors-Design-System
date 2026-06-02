@@ -15,8 +15,37 @@ import { productSchema, faqSchema } from '../utils/schema'
 import { products } from '../data/products'
 import type { Product } from '../data/products'
 import { useBasketStore } from '../store/basketStore'
+import {
+  calculateWindowPrice,
+  calculateDoorPrice,
+} from '../pricing'
+import type { WindowQuoteInput, DoorQuoteInput } from '../pricing'
 
-function calcPrice(product: Product, selections: Record<string, string>, measurement: { width: string; height: string }) {
+// Representative default SKU per door product slug
+const PRODUCT_SLUG_TO_SKU: Record<string, string> = {
+  'composite-doors': 'CD-08',
+  'upvc-doors':      'CD-146',
+  'french-doors':    'CD-70',
+  'bi-fold-doors':   'CD-54',
+  'patio-doors':     'CD-39',
+}
+
+function resolveColourType(priceModifier: number): WindowQuoteInput['colourType'] {
+  if (priceModifier <= 0) return 'white'
+  if (priceModifier <= 75) return 'standard'
+  return 'premium'
+}
+
+interface PriceState {
+  value: number
+  fromEngine: boolean
+  error: string | null
+}
+
+function calcFallbackPrice(
+  product: Product,
+  selections: Record<string, string>,
+): number {
   let price = product.basePrice
   for (const variant of product.variants) {
     const selected = selections[variant.id]
@@ -25,17 +54,104 @@ function calcPrice(product: Product, selections: Record<string, string>, measure
       if (opt) price += opt.priceModifier
     }
   }
-  const w = parseFloat(measurement.width)
-  const h = parseFloat(measurement.height)
-  if (w > 0 && h > 0) {
-    const areaM2 = (w / 1000) * (h / 1000)
-    const threshold = product.category === 'windows' ? 0.5 : 0.6
-    const rate = product.category === 'windows' ? 280 : 350
-    if (areaM2 > threshold) {
-      price += Math.round((areaM2 - threshold) * rate)
+  return price
+}
+
+function calcWindowEnginePrice(
+  product: Product,
+  selections: Record<string, string>,
+  widthMm: number,
+  heightMm: number,
+): PriceState {
+  try {
+    const colourVariant = product.variants.find((v) => v.type === 'colour')
+    const selectedColourId = colourVariant ? selections[colourVariant.id] : undefined
+    const colourOpt = colourVariant?.options.find((o) => o.id === selectedColourId)
+    const colourType = colourOpt ? resolveColourType(colourOpt.priceModifier) : 'white'
+
+    const openerVariant = product.variants.find((v) => v.id === 'openers')
+    const openers = openerVariant
+      ? parseInt(selections[openerVariant.id] ?? '0', 10) || 0
+      : 0
+
+    const midRailVariant = product.variants.find((v) => v.id === 'mid_rail')
+    const midRail = midRailVariant ? selections[midRailVariant.id] === 'true' : false
+
+    const georgianBarVariant = product.variants.find((v) => v.id === 'georgian_bar')
+    const georgianBar = georgianBarVariant ? selections[georgianBarVariant.id] === 'true' : false
+
+    const leadingVariant = product.variants.find((v) => v.id === 'leading')
+    const leading = leadingVariant ? selections[leadingVariant.id] === 'true' : false
+
+    const flushCasementVariant = product.variants.find((v) => v.id === 'flush_casement')
+    const flushCasement = flushCasementVariant
+      ? selections[flushCasementVariant.id] === 'true'
+      : false
+
+    const result = calculateWindowPrice({
+      widthMm,
+      heightMm,
+      openers,
+      colourType,
+      midRail,
+      georgianBar,
+      leading,
+      flushCasement,
+    })
+    return { value: result.totalPriceRounded, fromEngine: true, error: null }
+  } catch (e) {
+    return {
+      value: 0,
+      fromEngine: false,
+      error: e instanceof Error ? e.message : 'Pricing error',
     }
   }
-  return price
+}
+
+function calcDoorEnginePrice(
+  product: Product,
+  selections: Record<string, string>,
+): PriceState {
+  const skuId = PRODUCT_SLUG_TO_SKU[product.slug]
+  if (!skuId) {
+    return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
+  }
+
+  try {
+    const sizeVariant = product.variants.find((v) => v.type === 'size')
+    const selectedSizeId = sizeVariant ? selections[sizeVariant.id] : undefined
+    const isLargeDoor =
+      selectedSizeId === 'wide' || selectedSizeId === 'large' || selectedSizeId === 'extra-large'
+
+    const colourVariant = product.variants.find((v) => v.type === 'colour')
+    const selectedColourId = colourVariant ? selections[colourVariant.id] : undefined
+    const colourOpt = colourVariant?.options.find((o) => o.id === selectedColourId)
+    const premiumColour = colourOpt ? colourOpt.priceModifier > 0 : false
+
+    const sidePanelVariant = product.variants.find((v) => v.type === 'sidePanels')
+    const selectedSidePanelId = sidePanelVariant ? selections[sidePanelVariant.id] : undefined
+    const sideLight = !!selectedSidePanelId && selectedSidePanelId !== 'none'
+
+    const input: DoorQuoteInput = {
+      skuId,
+      isLargeDoor,
+      premiumColour,
+      autoLock: false,
+      letterbox: false,
+      knocker: false,
+      topLight: false,
+      sideLight,
+    }
+
+    const result = calculateDoorPrice(input)
+    return { value: result.totalPriceRounded, fromEngine: true, error: null }
+  } catch (e) {
+    return {
+      value: 0,
+      fromEngine: false,
+      error: e instanceof Error ? e.message : 'Pricing error',
+    }
+  }
 }
 
 export function ProductDetailPage() {
@@ -64,21 +180,32 @@ export function ProductDetailPage() {
   const [measurement, setMeasurement] = useState({ width: '', height: '' })
   const [added, setAdded] = useState(false)
 
-  const price = useMemo(() => {
-    if (!product) return 0
-    const mmW =
-      measurement.width
-        ? measureUnit === 'CM'
-          ? parseFloat(measurement.width) * 10
-          : parseFloat(measurement.width)
-        : 0
-    const mmH =
-      measurement.height
-        ? measureUnit === 'CM'
-          ? parseFloat(measurement.height) * 10
-          : parseFloat(measurement.height)
-        : 0
-    return calcPrice(product, selections, { width: String(mmW), height: String(mmH) })
+  const priceState = useMemo((): PriceState => {
+    if (!product) return { value: 0, fromEngine: false, error: null }
+
+    const toMm = (val: string) => {
+      if (!val) return 0
+      const n = parseFloat(val)
+      return isNaN(n) ? 0 : measureUnit === 'CM' ? n * 10 : n
+    }
+
+    const widthMm = toMm(measurement.width)
+    const heightMm = toMm(measurement.height)
+    const hasMeasurements = widthMm > 0 && heightMm > 0
+
+    if (product.category === 'windows') {
+      if (hasMeasurements) {
+        return calcWindowEnginePrice(product, selections, widthMm, heightMm)
+      }
+      // Fallback: use existing band-based logic via variant priceModifiers
+      return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
+    }
+
+    if (product.category === 'doors') {
+      return calcDoorEnginePrice(product, selections)
+    }
+
+    return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
   }, [product, selections, measurement, measureUnit])
 
   if (!product) {
@@ -118,7 +245,7 @@ export function ProductDetailPage() {
       category: product.category,
       selectedVariants: selections,
       variantSummary,
-      indicativePrice: price,
+      indicativePrice: priceState.value,
       quantity: 1,
     })
     setAdded(true)
@@ -175,10 +302,26 @@ export function ProductDetailPage() {
               <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-2">
                 Indicative Installed Price
               </p>
-              <PriceDisplay price={price} size="large" assuranceText="" />
-              <p className="font-sans text-sm text-ink-muted mt-2">
-                {product.unit} &mdash; confirmed at survey, no payment today
-              </p>
+
+              {priceState.error ? (
+                <Alert
+                  variant="warning"
+                  message={`This specification needs a custom quote. Please contact us at hello@buywindowsanddoors.co.uk`}
+                />
+              ) : (
+                <>
+                  <PriceDisplay price={priceState.value} size="large" assuranceText="" />
+                  {priceState.fromEngine && measurement.width && measurement.height ? (
+                    <p className="font-sans text-sm text-ink-muted mt-2">
+                      Price calculated from your measurements. Confirmed at survey.
+                    </p>
+                  ) : (
+                    <p className="font-sans text-sm text-ink-muted mt-2">
+                      {product.unit} &mdash; confirmed at survey, no payment today
+                    </p>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Variants */}
@@ -206,7 +349,9 @@ export function ProductDetailPage() {
                                     : opt.borderHex || 'transparent',
                                 }}
                                 className={`w-11 h-11 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none ${
-                                  isSelected ? 'ring-2 ring-brand ring-offset-2 ring-offset-paper' : ''
+                                  isSelected
+                                    ? 'ring-2 ring-brand ring-offset-2 ring-offset-paper'
+                                    : ''
                                 }`}
                                 onClick={() =>
                                   setSelections((s) => ({ ...s, [variant.id]: opt.id }))
@@ -226,7 +371,10 @@ export function ProductDetailPage() {
                           <p className="font-sans text-sm text-ink">
                             {selectedOpt.label}
                             {selectedOpt.priceModifier > 0 && (
-                              <span className="text-ink-muted"> — + £{selectedOpt.priceModifier}</span>
+                              <span className="text-ink-muted">
+                                {' '}
+                                — + £{selectedOpt.priceModifier}
+                              </span>
                             )}
                             {selectedOpt.priceModifier === 0 && (
                               <span className="text-ink-muted"> — Included</span>
@@ -252,12 +400,20 @@ export function ProductDetailPage() {
                             >
                               <span>{opt.label}</span>
                               {opt.priceModifier > 0 && (
-                                <span className={`text-xs mt-0.5 ${isSelected ? 'text-paper opacity-75' : 'text-ink-muted'}`}>
+                                <span
+                                  className={`text-xs mt-0.5 ${
+                                    isSelected ? 'text-paper opacity-75' : 'text-ink-muted'
+                                  }`}
+                                >
                                   + £{opt.priceModifier}
                                 </span>
                               )}
                               {opt.priceModifier < 0 && (
-                                <span className={`text-xs mt-0.5 ${isSelected ? 'text-paper opacity-75' : 'text-ink-muted'}`}>
+                                <span
+                                  className={`text-xs mt-0.5 ${
+                                    isSelected ? 'text-paper opacity-75' : 'text-ink-muted'
+                                  }`}
+                                >
                                   - £{Math.abs(opt.priceModifier)}
                                 </span>
                               )}
@@ -271,70 +427,75 @@ export function ProductDetailPage() {
               })}
             </div>
 
-            {/* Measurement input */}
-            <div className="mb-8 border-t border-hairline pt-6">
-              <button
-                onClick={() => setMeasureOpen((o) => !o)}
-                className="flex items-center gap-2 font-sans text-sm text-brand hover:underline"
-              >
-                {measureOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                {measureOpen ? 'Hide measurements' : '+ Know your exact measurements?'}
-              </button>
-
-              {measureOpen && (
-                <div className="mt-4 space-y-4">
-                  <div className="flex gap-2 mb-4">
-                    {(['MM', 'CM'] as const).map((u) => (
-                      <button
-                        key={u}
-                        onClick={() => setMeasureUnit(u)}
-                        className={`px-4 py-1.5 border font-sans text-sm rounded transition-colors ${
-                          measureUnit === u
-                            ? 'bg-ink text-paper border-ink'
-                            : 'bg-surface border-hairline text-ink'
-                        }`}
-                      >
-                        {u}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
-                        Width ({measureUnit})
-                      </label>
-                      <input
-                        type="number"
-                        value={measurement.width}
-                        onChange={(e) => setMeasurement((m) => ({ ...m, width: e.target.value }))}
-                        className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2 rounded focus:outline-none focus:border-brand"
-                        placeholder="e.g. 900"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
-                        Height ({measureUnit})
-                      </label>
-                      <input
-                        type="number"
-                        value={measurement.height}
-                        onChange={(e) => setMeasurement((m) => ({ ...m, height: e.target.value }))}
-                        className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2 rounded focus:outline-none focus:border-brand"
-                        placeholder="e.g. 1200"
-                      />
-                    </div>
-                  </div>
-                  <p className="font-sans text-xs text-ink-muted">
-                    Measure the existing frame, not the glass
-                  </p>
-                  {measurement.width && measurement.height && (
-                    <p className="font-sans text-sm text-ink-muted">
-                      Price adjusted for your measurements. Confirmed at survey.
-                    </p>
+            {/* Measurement input (windows only) */}
+            {product.category === 'windows' && (
+              <div className="mb-8 border-t border-hairline pt-6">
+                <button
+                  onClick={() => setMeasureOpen((o) => !o)}
+                  className="flex items-center gap-2 font-sans text-sm text-brand hover:underline"
+                >
+                  {measureOpen ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
                   )}
-                </div>
-              )}
-            </div>
+                  {measureOpen ? 'Hide measurements' : '+ Know your exact measurements?'}
+                </button>
+
+                {measureOpen && (
+                  <div className="mt-4 space-y-4">
+                    <div className="flex gap-2 mb-4">
+                      {(['MM', 'CM'] as const).map((u) => (
+                        <button
+                          key={u}
+                          onClick={() => setMeasureUnit(u)}
+                          className={`px-4 py-1.5 border font-sans text-sm rounded transition-colors ${
+                            measureUnit === u
+                              ? 'bg-ink text-paper border-ink'
+                              : 'bg-surface border-hairline text-ink'
+                          }`}
+                        >
+                          {u}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
+                          Width ({measureUnit})
+                        </label>
+                        <input
+                          type="number"
+                          value={measurement.width}
+                          onChange={(e) =>
+                            setMeasurement((m) => ({ ...m, width: e.target.value }))
+                          }
+                          className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2 rounded focus:outline-none focus:border-brand"
+                          placeholder="e.g. 900"
+                        />
+                      </div>
+                      <div>
+                        <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
+                          Height ({measureUnit})
+                        </label>
+                        <input
+                          type="number"
+                          value={measurement.height}
+                          onChange={(e) =>
+                            setMeasurement((m) => ({ ...m, height: e.target.value }))
+                          }
+                          className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2 rounded focus:outline-none focus:border-brand"
+                          placeholder="e.g. 1200"
+                        />
+                      </div>
+                    </div>
+                    <p className="font-sans text-xs text-ink-muted">
+                      Measure the existing frame, not the glass
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Add to basket */}
             {added ? (
@@ -349,13 +510,19 @@ export function ProductDetailPage() {
                   >
                     Added — View Quote
                   </Button>
-                  <Button variant="ghost" onClick={() => { setAdded(false) }}>
+                  <Button variant="ghost" onClick={() => setAdded(false)}>
                     Continue browsing
                   </Button>
                 </div>
               </div>
             ) : (
-              <Button variant="accent" size="lg" className="w-full" onClick={handleAddToBasket}>
+              <Button
+                variant="accent"
+                size="lg"
+                className="w-full"
+                onClick={handleAddToBasket}
+                disabled={!!priceState.error}
+              >
                 Add to Quote
               </Button>
             )}
@@ -371,7 +538,10 @@ export function ProductDetailPage() {
               <ul className="space-y-3">
                 {product.features.map((f) => (
                   <li key={f} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" strokeWidth={2} />
+                    <Check
+                      className="w-5 h-5 text-brand flex-shrink-0 mt-0.5"
+                      strokeWidth={2}
+                    />
                     <span className="font-sans text-base text-ink">{f}</span>
                   </li>
                 ))}
@@ -385,7 +555,10 @@ export function ProductDetailPage() {
             <ul className="space-y-3">
               {product.included.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <Check
+                    className="w-5 h-5 text-brand flex-shrink-0 mt-0.5"
+                    strokeWidth={2}
+                  />
                   <span className="font-sans text-base text-ink">{item}</span>
                 </li>
               ))}
@@ -416,7 +589,9 @@ export function ProductDetailPage() {
 
           {/* Description */}
           <div>
-            <h2 className="font-display text-2xl text-ink mb-6">About {product.name.toLowerCase()}</h2>
+            <h2 className="font-display text-2xl text-ink mb-6">
+              About {product.name.toLowerCase()}
+            </h2>
             <div className="space-y-4 max-w-prose">
               <p className="font-sans text-base text-ink leading-relaxed">
                 {product.name} are one of the most popular choices for West Yorkshire homes. They
@@ -430,10 +605,10 @@ export function ProductDetailPage() {
                 installation by a FENSA-registered fitter, and all finishing work.
               </p>
               <p className="font-sans text-base text-ink leading-relaxed">
-                A surveyor will visit to confirm your exact measurements before any work begins. In
-                the majority of straightforward jobs, the final price matches what you see here. If
-                anything non-standard is identified, your surveyor will explain it clearly and in
-                writing before any work is agreed.
+                A surveyor will visit to confirm your exact measurements before any work begins.
+                In the majority of straightforward jobs, the final price matches what you see
+                here. If anything non-standard is identified, your surveyor will explain it
+                clearly and in writing before any work is agreed.
               </p>
             </div>
           </div>
@@ -441,7 +616,9 @@ export function ProductDetailPage() {
           {/* FAQ */}
           {product.faqs.length > 0 && (
             <div>
-              <h2 className="font-display text-2xl text-ink mb-6">Frequently asked questions</h2>
+              <h2 className="font-display text-2xl text-ink mb-6">
+                Frequently asked questions
+              </h2>
               <FAQ items={product.faqs} />
             </div>
           )}

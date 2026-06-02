@@ -46,7 +46,7 @@ export function HomePage() {
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
 
-    const total = windows * 600 + doors * 750 + compositeDoors * 1250
+    const total = windows * 600 + doors * 750 + compositeDoors * 1195
     const low = Math.round((total * 0.8) / 50) * 50
     const high = Math.round((total * 1.25) / 50) * 50
     setResult({ low, high })
