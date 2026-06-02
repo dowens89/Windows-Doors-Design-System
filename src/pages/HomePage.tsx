@@ -106,8 +106,8 @@ export function HomePage() {
         {/* Mobile image — appears above content */}
         <div className="block md:hidden w-full h-[280px] overflow-hidden flex-shrink-0">
           <img
-            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1200"
-            alt="Composite door installed on a residential home"
+            src="https://res.cloudinary.com/dw0wt42ns/image/upload/v1780422068/hero-splash_xnswmo.jpg"
+            alt="New windows and doors installed on a detached house"
             className="w-full h-full object-cover"
           />
         </div>
