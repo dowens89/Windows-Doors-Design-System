@@ -116,7 +116,7 @@ export function HomePage() {
         </div>
 
         {/* Left: content */}
-        <div className="bg-brand flex flex-col justify-center px-8 py-6 md:px-6 md:py-6 w-full md:w-[55%]">
+        <div className="bg-brand flex flex-col justify-center px-8 py-6 md:px-12 md:py-6 w-full md:w-[55%]">
           <p className="font-mono text-xs text-paper opacity-70 uppercase tracking-widest mb-6">
             No Salesperson · Transparent Pricing · One Installer
           </p>
