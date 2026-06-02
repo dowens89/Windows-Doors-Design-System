@@ -4,113 +4,147 @@ import { Layout } from '../components/Layout'
 import { Button } from '../components/ds/Button'
 import { useSEO } from '../utils/seo'
 
+interface Step {
+  num: string
+  heading: string
+  body: string
+  callout: string
+  image: string
+  imageAlt: string
+  imageRight: boolean
+}
+
+const STEPS: Step[] = [
+  {
+    num: 'Step 01',
+    heading: 'Browse real prices.\nNo registration needed.',
+    body: 'Open our product catalogue and start browsing windows and doors. Every product shows a real indicative installed price — not a range so wide it means nothing, not a "call for a quote" placeholder. A number. Before you give us anything.\n\nChoose your product type, select your specification — size, colour, glazing — and watch the price update in real time. When you have what you need, add it to your quote. There is no account to create and no contact details required to see prices.',
+    callout:
+      'The average WDO customer spends 8 minutes browsing before submitting a survey request.',
+    image:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600',
+    imageAlt: 'Modern window in a West Yorkshire home',
+    imageRight: true,
+  },
+  {
+    num: 'Step 02',
+    heading: 'Submit your request.\nWe do the matching.',
+    body: 'When you are ready, tell us your address and confirm your specification. You can upload a photo of your current window or door — it helps your installer prepare, though it is not required.\n\nYou are not paying anything at this stage. We take your request and match it to the right vetted installer in your area. You will receive a confirmation within 24 hours telling you which installer has accepted your job.',
+    callout:
+      'Your details go to one installer only — never a list of companies competing for your number.',
+    image:
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
+    imageAlt: 'Residential street in West Yorkshire',
+    imageRight: false,
+  },
+  {
+    num: 'Step 03',
+    heading: 'A surveyor visits.\nNot a salesperson.',
+    body: 'Your installer will contact you within 48 hours of accepting your job to arrange a convenient survey visit. The survey takes 15–60 minutes depending on the size of the job.\n\nThe surveyor confirms measurements and checks for anything non-standard. That is it. There is no sales presentation, no manager call, no pressure to sign anything. In most standard jobs the price confirmed at survey matches what you saw online.',
+    callout:
+      'If a surveyor tries to reprice without a legitimate reason, they are removed from our platform.',
+    image:
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=600',
+    imageAlt: 'Surveyor measuring a window opening',
+    imageRight: true,
+  },
+  {
+    num: 'Step 04',
+    heading: 'Installation day.\nWhat to expect.',
+    body: 'A standard composite door installation takes 2–4 hours. A full window replacement for a typical West Yorkshire terrace takes one day. Your installer will confirm the exact schedule when they arrange your survey.\n\nAll our installers are FENSA registered. You will receive a FENSA certificate on completion — you will need it when you sell your home.',
+    callout:
+      'WDO charges the installer a small fee on completion only. If your job is not completed, we do not get paid.',
+    image:
+      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80&w=600',
+    imageAlt: 'Window installation in progress',
+    imageRight: false,
+  },
+]
+
 export function HowItWorksPage() {
   useSEO({
     title: 'How It Works | Windows & Doors Online',
     description:
-      'See how WDO helps West Yorkshire homeowners get honest installed prices and get matched with a vetted local installer.',
+      'See how WDO helps West Yorkshire homeowners get honest installed prices and get matched with a vetted local installer — no salesperson, no pressure.',
   })
+
   const navigate = useNavigate()
 
   return (
     <Layout>
-      <div className="max-w-[720px] mx-auto px-6 md:px-8 py-16">
-        <h1 className="font-display text-3xl md:text-4xl text-ink mb-16">
-          How Windows & Doors Online works
+      {/* ── HERO BAND ────────────────────────────────────────────── */}
+      <section className="bg-brand py-20 px-8 text-center">
+        <h1 className="font-display text-5xl text-paper leading-tight">
+          No surprises. No pressure.<br />No salesperson.
         </h1>
+        <p className="font-sans text-paper opacity-70 text-xl mt-4 max-w-2xl mx-auto leading-relaxed">
+          Here is exactly what happens from the moment you browse to the moment your windows or
+          doors are installed.
+        </p>
+      </section>
 
-        <section className="mb-16">
-          <h2 className="font-display text-2xl text-ink mb-8">For you — the customer journey</h2>
-          <div className="space-y-5 font-sans text-base text-ink leading-relaxed">
-            <p>
-              You browse our range online, choose the product type that suits your home, and
-              configure your specification — size, colour, glazing — using the options on each
-              product page. The price updates in real time as you make selections. No registration
-              required. No contact details needed to see a price.
-            </p>
-            <p>
-              When you're ready, you add your products to a quote and proceed to checkout. You give
-              us your name, address, and phone number so we can arrange a survey. You can upload a
-              photo of your current window or door if you have one — it helps your installer
-              prepare. No payment is taken at any stage.
-            </p>
-            <p>
-              You will not be pressured to buy at any point. The survey is a technical visit to
-              confirm your exact measurements and check for anything non-standard. There is no
-              salesperson involved. Your installer is a qualified fitter, not someone on commission.
-            </p>
-            <p>
-              The price you see online is an honest indicative price based on standard installation
-              conditions. In the majority of straightforward jobs, the final price after survey
-              matches what you saw here. If something non-standard is found — a structural issue,
-              scaffolding requirement, or access constraint — your installer will explain it in
-              writing before any work begins. You can walk away at any point with no obligation.
-            </p>
-            <p>
-              Once work is agreed and completed, you receive a FENSA certificate confirming
-              building regulations compliance. This is required by law for replacement glazing in
-              England and Wales and is important when you come to sell your home.
-            </p>
+      {/* ── GUIDED STEPS ─────────────────────────────────────────── */}
+      {STEPS.map((step, i) => (
+        <section
+          key={step.num}
+          className={i % 2 === 0 ? 'bg-paper' : 'bg-surface'}
+        >
+          <div className="max-w-6xl mx-auto px-8 py-20">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 gap-16 items-center ${
+                !step.imageRight ? 'md:[&>*:first-child]:order-2' : ''
+              }`}
+            >
+              {/* Content */}
+              <div>
+                <p className="font-mono text-xs text-brand uppercase tracking-widest mb-4">
+                  {step.num}
+                </p>
+                <h2 className="font-display text-4xl text-ink mb-6 leading-tight whitespace-pre-line">
+                  {step.heading}
+                </h2>
+                <div className="font-sans text-ink-muted text-lg leading-relaxed max-w-prose mb-8 space-y-4">
+                  {step.body.split('\n\n').map((para, j) => (
+                    <p key={j}>{para}</p>
+                  ))}
+                </div>
+                <div className="bg-brand text-paper font-sans text-sm p-4 rounded-sm">
+                  {step.callout}
+                </div>
+              </div>
+
+              {/* Image */}
+              <div className="aspect-[3/4] overflow-hidden">
+                <img
+                  src={step.image}
+                  alt={step.imageAlt}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </div>
           </div>
         </section>
+      ))}
 
-        <section className="mb-16">
-          <h2 className="font-display text-2xl text-ink mb-8">Our installers</h2>
-          <div className="space-y-5 font-sans text-base text-ink leading-relaxed">
-            <p>
-              Every installer on our platform is vetted before being accepted. We check their FENSA
-              registration, their public liability insurance, and their references. We do not accept
-              self-certification without verification.
-            </p>
-            <p>
-              Installers commit to contacting you within 24 hours of receiving your job, arranging
-              a survey within 48 hours, and providing a written price before any work begins. They
-              also commit to our pricing promise — the only legitimate reasons to vary from the
-              indicative price are those defined on our Pricing Promise page.
-            </p>
-            <p>
-              We take pricing integrity seriously. Any installer who reprices without a legitimate
-              reason from our defined list is removed from the platform immediately. Our business
-              model only works if customers trust the prices they see. That alignment is how we
-              hold installers to account.
-            </p>
-          </div>
-        </section>
-
-        <section className="mb-16">
-          <h2 className="font-display text-2xl text-ink mb-8">What indicative pricing means</h2>
-          <div className="space-y-5 font-sans text-base text-ink leading-relaxed">
-            <p>
-              Every price on this site is an indicative installed price. It includes supply of the
-              unit to your specification, professional installation, removal and disposal of your
-              existing window or door, a FENSA certificate, and all sealing and finishing work.
-              Standard installation means a straightforward like-for-like replacement in a
-              structurally sound opening with normal access.
-            </p>
-            <p>
-              The word "indicative" is important. We cannot confirm the exact final price until a
-              surveyor has visited and measured your opening. Most jobs are completely standard and
-              the price does not change. Some jobs involve circumstances that couldn't be known
-              before the visit. In those cases, the surveyor explains the variation before any work
-              is agreed and you have full choice over whether to proceed.
-            </p>
-            <p>
-              We publish the complete list of legitimate reasons a price may vary on our Pricing
-              Promise page. We believe in transparency about what "indicative" means — not using
-              it as a word that gives installers licence to charge more whenever they feel like it.
-            </p>
-          </div>
-        </section>
-
-        <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-hairline">
-          <Button variant="primary" onClick={() => navigate('/shop')}>
-            Browse Products
-          </Button>
-          <Button variant="secondary" onClick={() => navigate('/quick-quote')}>
-            Get a Quick Quote
+      {/* ── PRICING PROMISE CALLOUT ───────────────────────────────── */}
+      <section className="bg-accent py-12 px-8 text-center">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="font-display text-3xl text-paper mb-4">What if the price changes?</h2>
+          <p className="font-sans text-paper opacity-80 text-lg max-w-2xl mx-auto mb-8">
+            The only legitimate reasons a price can change after survey are structural issues,
+            scaffolding requirements, or a significant measurement discrepancy. Everything else is
+            not acceptable.
+          </p>
+          <Button
+            variant="primary"
+            style={{ backgroundColor: 'var(--color-paper)', color: 'var(--color-accent)' }}
+            onClick={() => navigate('/pricing-promise')}
+          >
+            Read Our Pricing Promise
           </Button>
         </div>
-      </div>
+      </section>
     </Layout>
   )
 }
