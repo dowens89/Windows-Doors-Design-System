@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate, Navigate } from 'react-router-dom'
 import { X, Search } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/ds/Button'
@@ -50,10 +50,14 @@ export function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
 
+  const isDoorsCat =
+    searchParams.get('category') === 'doors' || categoryParam === 'doors'
+
   const [activeCategory, setActiveCategory] = useState<Category>(() => {
+    if (isDoorsCat) return null
     const qc = searchParams.get('category')
-    if (qc === 'windows' || qc === 'doors') return qc
-    if (categoryParam === 'windows' || categoryParam === 'doors') return categoryParam
+    if (qc === 'windows') return 'windows'
+    if (categoryParam === 'windows') return 'windows'
     return null
   })
   const [activeTypes, setActiveTypes] = useState<string[]>(() => {
@@ -62,6 +66,10 @@ export function ShopPage() {
   })
   const [minPrice, setMinPrice] = useState<string>(searchParams.get('minPrice') || '')
   const [maxPrice, setMaxPrice] = useState<string>(searchParams.get('maxPrice') || '')
+
+  if (isDoorsCat) {
+    return <Navigate to="/doors" replace />
+  }
 
   const updateURL = useCallback(
     (cat: Category, types: string[], min: string, max: string) => {
@@ -108,6 +116,7 @@ export function ShopPage() {
   }
 
   const filtered = products.filter((p) => {
+    if (p.category === 'doors') return false
     if (activeCategory && p.category !== activeCategory) return false
     if (activeTypes.length && !activeTypes.includes(p.type)) return false
     if (minPrice && p.basePrice < parseInt(minPrice)) return false
@@ -120,15 +129,11 @@ export function ShopPage() {
 
   const hasFilters = activeCategory !== null || activeTypes.length > 0 || minPrice || maxPrice
 
-  const availableTypes = activeCategory
-    ? activeCategory === 'windows'
-      ? windowTypes
-      : doorTypes
-    : [...windowTypes, ...doorTypes]
+  const availableTypes = windowTypes
 
   const typeCounts = availableTypes.reduce<Record<string, number>>((acc, type) => {
     acc[type] = products.filter(
-      (p) => p.type === type && (!activeCategory || p.category === activeCategory)
+      (p) => p.type === type && p.category === 'windows'
     ).length
     return acc
   }, {})
@@ -193,36 +198,10 @@ export function ShopPage() {
           {/* Sidebar */}
           <aside className="hidden md:block w-64 flex-shrink-0">
             <div className="border border-hairline bg-surface p-5 space-y-8">
-              {/* Category */}
-              <div>
-                <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
-                  Category
-                </p>
-                {([null, 'windows', 'doors'] as const).map((cat) => (
-                  <label key={String(cat)} className="flex items-center gap-2 py-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={activeCategory === cat}
-                      onChange={() => setCategory(cat)}
-                      className="accent-brand"
-                    />
-                    <span className="font-sans text-sm text-ink">
-                      {cat === null ? 'All Products' : cat === 'windows' ? 'Windows' : 'Doors'}
-                    </span>
-                    <span className="font-sans text-xs text-ink-muted ml-auto">
-                      {cat === null
-                        ? products.length
-                        : products.filter((p) => p.category === cat).length}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
               {/* Type */}
               <div>
                 <p className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-muted mb-3">
-                  Product Type
+                  Window Type
                 </p>
                 {availableTypes.map((type) => (
                   <label key={type} className="flex items-center gap-2 py-1.5 cursor-pointer">
@@ -267,19 +246,6 @@ export function ShopPage() {
 
           {/* Mobile filter pills */}
           <div className="md:hidden flex flex-wrap gap-2 mb-4">
-            {([null, 'windows', 'doors'] as const).map((cat) => (
-              <button
-                key={String(cat)}
-                onClick={() => setCategory(cat)}
-                className={`font-sans text-sm px-3 py-1.5 border rounded transition-colors ${
-                  activeCategory === cat
-                    ? 'bg-brand text-paper border-brand'
-                    : 'bg-surface border-hairline text-ink'
-                }`}
-              >
-                {cat === null ? 'All' : cat === 'windows' ? 'Windows' : 'Doors'}
-              </button>
-            ))}
             {availableTypes.map((type) => (
               <button
                 key={type}

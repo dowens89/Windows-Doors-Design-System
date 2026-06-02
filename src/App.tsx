@@ -10,6 +10,9 @@ import { DesignSystem } from './pages/DesignSystem'
 import { HomePage } from './pages/HomePage'
 import { ShopPage } from './pages/ShopPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
+import { WindowPDPPage } from './pages/WindowPDPPage'
+import { DoorPLPPage } from './pages/DoorPLPPage'
+import { DoorPDPPage } from './pages/DoorPDPPage'
 import { QuickQuotePage } from './pages/QuickQuotePage'
 import { BasketPage } from './pages/BasketPage'
 import { CheckoutPage } from './pages/CheckoutPage'
@@ -44,9 +47,10 @@ export function App() {
         <Route path="/shop/:category" element={<ShopPage />} />
         <Route path="/windows/tilt-turn-windows" element={<Navigate to="/shop?category=windows" replace />} />
         <Route path="/windows/french-windows" element={<Navigate to="/shop?category=windows" replace />} />
-        <Route path="/doors/bi-fold-doors" element={<Navigate to="/shop?category=doors" replace />} />
-        <Route path="/windows/:slug" element={<ProductDetailPage />} />
-        <Route path="/doors/:slug" element={<ProductDetailPage />} />
+        <Route path="/doors/bi-fold-doors" element={<Navigate to="/doors" replace />} />
+        <Route path="/windows/:slug" element={<WindowPDPPage />} />
+        <Route path="/doors" element={<DoorPLPPage />} />
+        <Route path="/doors/:slug" element={<DoorPDPPage />} />
         <Route path="/quick-quote" element={<QuickQuotePage />} />
         <Route path="/basket" element={<BasketPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />

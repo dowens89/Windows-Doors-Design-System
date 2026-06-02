@@ -1,3 +1,27 @@
+export const DOOR_PLACEHOLDER_IMAGE =
+  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=800'
+
+export interface DoorProduct {
+  id: string
+  slug: string
+  category: 'doors'
+  skuId: string
+  rangeName: string
+  variantType: 'standard' | 'bevel' | 'solid' | 'mini_blind' | 'pvc'
+  name: string
+  shortDescription: string
+  basePrice: number
+  imageUrl: string
+  pricetier: 'budget' | 'mid' | 'upper' | 'premium'
+  included: string[]
+  faqs: { question: string; answer: string }[]
+  seo: {
+    title: string
+    description: string
+    h1: string
+  }
+}
+
 export interface ProductVariantOption {
   id: string
   label: string
@@ -644,5 +668,393 @@ export const products: Product[] = [
         'Patio doors with transparent installed prices for West Yorkshire. Smooth sliding action, slim sightlines. See your price online.',
       h1: 'Patio Doors — From £950 Installed',
     },
+  },
+]
+
+const doorIncludedItems: string[] = [
+  'Supply of composite door to your specification',
+  'Professional installation by a FENSA-registered fitter',
+  'White handle included as standard',
+  'Removal and disposal of your existing door',
+  'FENSA certificate',
+  'Mastic seal and weather bar',
+]
+
+const doorFaqs: { question: string; answer: string }[] = [
+  {
+    question: 'Is the online price what I will pay?',
+    answer:
+      'The price shown is an honest indicative installed price based on standard installation. A surveyor will visit to confirm exact measurements and check for anything non-standard. In most straightforward replacements the final price matches what you see here.',
+  },
+  {
+    question: 'Will I be pressured to buy at the survey?',
+    answer:
+      'No. The survey is a technical visit to confirm your specification. There is no salesperson. You are under no obligation at any stage.',
+  },
+  {
+    question: 'How long does installation take?',
+    answer:
+      'A standard composite door installation typically takes 2-4 hours. Your installer confirms the timeframe when arranging your survey.',
+  },
+  {
+    question: 'Which areas do you cover?',
+    answer:
+      'We serve West Yorkshire, South Yorkshire, East Yorkshire, North Yorkshire, Lancashire and Manchester.',
+  },
+  {
+    question: 'What handles are included as standard?',
+    answer:
+      'All doors include a white handle as standard. Long bar handles in 600mm, 1200mm and 1800mm are available as upgrades.',
+  },
+]
+
+function doorSeo(name: string, price: number) {
+  return {
+    title: `${name} Composite Door | From £${price} | Windows & Doors Online`,
+    description: `The ${name} composite door installed from £${price}. Honest installed prices — no salesperson, no pressure.`,
+    h1: `${name} Composite Door — Installed Price`,
+  }
+}
+
+export const doorProducts: DoorProduct[] = [
+  {
+    id: 'pvc-glazed',
+    slug: 'pvc-glazed',
+    category: 'doors',
+    skuId: 'CD-146',
+    rangeName: 'PVC Glazed',
+    variantType: 'standard',
+    name: 'PVC Glazed Door',
+    shortDescription:
+      'A practical, affordable glazed door. Ideal for side and rear entrances where value and durability matter.',
+    basePrice: 750.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'budget',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('PVC Glazed Door', 750),
+  },
+  {
+    id: 'pvc-panel',
+    slug: 'pvc-panel',
+    category: 'doors',
+    skuId: 'CD-147',
+    rangeName: 'PVC Panel',
+    variantType: 'solid',
+    name: 'PVC Panel Door',
+    shortDescription:
+      'A solid panel uPVC door offering excellent security and thermal efficiency at an accessible price point.',
+    basePrice: 787.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'budget',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('PVC Panel Door', 788),
+  },
+  {
+    id: 'pvc-bevel',
+    slug: 'pvc-bevel',
+    category: 'doors',
+    skuId: 'CD-145',
+    rangeName: 'PVC Bevel',
+    variantType: 'bevel',
+    name: 'PVC Bevel Door',
+    shortDescription:
+      'Classic bevel glazing on a robust uPVC frame. A step up from standard glazing with timeless kerb appeal.',
+    basePrice: 817.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'budget',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('PVC Bevel Door', 818),
+  },
+  {
+    id: 'edinburgh',
+    slug: 'edinburgh',
+    category: 'doors',
+    skuId: 'CD-58',
+    rangeName: 'Edinburgh',
+    variantType: 'standard',
+    name: 'Edinburgh',
+    shortDescription:
+      'Clean lines and a refined glazing panel. One of our most popular doors for traditional and modern homes alike.',
+    basePrice: 907.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'budget',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Edinburgh', 908),
+  },
+  {
+    id: 'edinburgh-bevel',
+    slug: 'edinburgh-bevel',
+    category: 'doors',
+    skuId: 'CD-59',
+    rangeName: 'Edinburgh',
+    variantType: 'bevel',
+    name: 'Edinburgh Bevel',
+    shortDescription:
+      'The Edinburgh with bevel glazing for a more decorative finish and enhanced character.',
+    basePrice: 940.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'budget',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Edinburgh Bevel', 941),
+  },
+  {
+    id: 'alnwick',
+    slug: 'alnwick',
+    category: 'doors',
+    skuId: 'CD-02',
+    rangeName: 'Alnwick',
+    variantType: 'standard',
+    name: 'Alnwick',
+    shortDescription:
+      'A versatile composite door combining security, style and value. Available in standard, bevel and solid configurations.',
+    basePrice: 931.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Alnwick', 932),
+  },
+  {
+    id: 'alnwick-bevel',
+    slug: 'alnwick-bevel',
+    category: 'doors',
+    skuId: 'CD-03',
+    rangeName: 'Alnwick',
+    variantType: 'bevel',
+    name: 'Alnwick Bevel',
+    shortDescription:
+      'The Alnwick with bevel glazing — a popular upgrade that adds depth and character to the classic design.',
+    basePrice: 946.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Alnwick Bevel', 947),
+  },
+  {
+    id: 'alnwick-solid',
+    slug: 'alnwick-solid',
+    category: 'doors',
+    skuId: 'CD-04',
+    rangeName: 'Alnwick',
+    variantType: 'solid',
+    name: 'Alnwick Solid',
+    shortDescription:
+      'The Alnwick in a fully solid configuration. Maximum privacy and thermal performance.',
+    basePrice: 858.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Alnwick Solid', 858),
+  },
+  {
+    id: 'carlisle',
+    slug: 'carlisle',
+    category: 'doors',
+    skuId: 'CD-39',
+    rangeName: 'Carlisle',
+    variantType: 'standard',
+    name: 'Carlisle',
+    shortDescription:
+      'A dependable mid-range composite door with clean proportions and strong kerb appeal.',
+    basePrice: 952.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Carlisle', 953),
+  },
+  {
+    id: 'balmoral',
+    slug: 'balmoral',
+    category: 'doors',
+    skuId: 'CD-15',
+    rangeName: 'Balmoral',
+    variantType: 'standard',
+    name: 'Balmoral',
+    shortDescription:
+      'Inspired by classic Georgian proportions. A statement door for traditional properties.',
+    basePrice: 960.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Balmoral', 960),
+  },
+  {
+    id: 'balmoral-bevel',
+    slug: 'balmoral-bevel',
+    category: 'doors',
+    skuId: 'CD-16',
+    rangeName: 'Balmoral',
+    variantType: 'bevel',
+    name: 'Balmoral Bevel',
+    shortDescription:
+      'The Balmoral with bevel glazing for an elevated finish. A popular choice for period properties.',
+    basePrice: 1089.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Balmoral Bevel', 1089),
+  },
+  {
+    id: 'conwy',
+    slug: 'conwy',
+    category: 'doors',
+    skuId: 'CD-46',
+    rangeName: 'Conwy',
+    variantType: 'standard',
+    name: 'Conwy',
+    shortDescription:
+      'Contemporary styling with a generous glazed panel. Suits both traditional and modern homes.',
+    basePrice: 939.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Conwy', 939),
+  },
+  {
+    id: 'conwy-mini-blind',
+    slug: 'conwy-mini-blind',
+    category: 'doors',
+    skuId: 'CD-48',
+    rangeName: 'Conwy',
+    variantType: 'mini_blind',
+    name: 'Conwy Mini Blind',
+    shortDescription:
+      'The Conwy with integrated mini blind — privacy and light control without external curtains or blinds.',
+    basePrice: 994.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'mid',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Conwy Mini Blind', 995),
+  },
+  {
+    id: 'arundel',
+    slug: 'arundel',
+    category: 'doors',
+    skuId: 'CD-08',
+    rangeName: 'Arundel',
+    variantType: 'standard',
+    name: 'Arundel',
+    shortDescription:
+      'An elegant design with a distinctive glazing arrangement. A strong choice for traditional brick homes.',
+    basePrice: 1057.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'upper',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Arundel', 1058),
+  },
+  {
+    id: 'arundel-bevel',
+    slug: 'arundel-bevel',
+    category: 'doors',
+    skuId: 'CD-09',
+    rangeName: 'Arundel',
+    variantType: 'bevel',
+    name: 'Arundel Bevel',
+    shortDescription:
+      'The Arundel with bevel glazing — refined detailing that elevates a classic design.',
+    basePrice: 1125.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'upper',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Arundel Bevel', 1125),
+  },
+  {
+    id: 'durham',
+    slug: 'durham',
+    category: 'doors',
+    skuId: 'CD-56',
+    rangeName: 'Durham',
+    variantType: 'standard',
+    name: 'Durham',
+    shortDescription:
+      'Understated and well-proportioned. A reliable choice across a wide range of property types.',
+    basePrice: 999.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'upper',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Durham', 999),
+  },
+  {
+    id: 'florence',
+    slug: 'florence',
+    category: 'doors',
+    skuId: 'CD-70',
+    rangeName: 'Florence',
+    variantType: 'standard',
+    name: 'Florence',
+    shortDescription:
+      'Continental styling with generous glazing. Makes a real statement on any front elevation.',
+    basePrice: 1231.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'upper',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Florence', 1232),
+  },
+  {
+    id: 'florence-bevel',
+    slug: 'florence-bevel',
+    category: 'doors',
+    skuId: 'CD-71',
+    rangeName: 'Florence',
+    variantType: 'bevel',
+    name: 'Florence Bevel',
+    shortDescription:
+      'The Florence with bevel glazing for maximum visual impact. Our most popular upper-range door.',
+    basePrice: 1252.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'upper',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Florence Bevel', 1253),
+  },
+  {
+    id: 'cheltenham',
+    slug: 'cheltenham',
+    category: 'doors',
+    skuId: 'CD-43',
+    rangeName: 'Cheltenham',
+    variantType: 'standard',
+    name: 'Cheltenham',
+    shortDescription:
+      'Our flagship premium composite door. Exceptional specification, striking presence, built to last.',
+    basePrice: 1536.0,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'premium',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Cheltenham', 1536),
+  },
+  {
+    id: 'cheltenham-bevel',
+    slug: 'cheltenham-bevel',
+    category: 'doors',
+    skuId: 'CD-44',
+    rangeName: 'Cheltenham',
+    variantType: 'bevel',
+    name: 'Cheltenham Bevel',
+    shortDescription:
+      'The Cheltenham with bevel glazing. The finest door in our range. Uncompromising on every detail.',
+    basePrice: 1630.5,
+    imageUrl: DOOR_PLACEHOLDER_IMAGE,
+    pricetier: 'premium',
+    included: doorIncludedItems,
+    faqs: doorFaqs,
+    seo: doorSeo('Cheltenham Bevel', 1631),
   },
 ]

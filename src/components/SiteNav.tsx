@@ -6,7 +6,7 @@ import { useBasketStore } from '../store/basketStore'
 
 const navLinks = [
   { label: 'Windows', to: '/shop?category=windows' },
-  { label: 'Doors', to: '/shop?category=doors' },
+  { label: 'Doors', to: '/doors' },
   { label: 'How it works', to: '/how-it-works' },
   { label: 'Pricing', to: '/pricing-promise' },
 ]
