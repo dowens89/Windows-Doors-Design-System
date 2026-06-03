@@ -495,7 +495,7 @@ export function HomePage() {
               {
                 name: 'Sash Windows',
                 from: '£650',
-                image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780466608/HP-Sash-windows_oybg3t.webp',
                 to: '/windows/sash-windows',
               },
               {
