@@ -501,13 +501,13 @@ export function HomePage() {
               {
                 name: 'Composite Doors',
                 from: '£1,195',
-                image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780466609/HP-composite-door_sfdcki.jpg',
                 to: '/doors/composite-doors',
               },
               {
-                name: 'Patio Doors',
+                name: 'French & Patio Doors',
                 from: '£950',
-                image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780469367/HP-French-door_pbbsvx.jpg',
                 to: '/doors/patio-doors',
               },
             ].map((cat) => (
