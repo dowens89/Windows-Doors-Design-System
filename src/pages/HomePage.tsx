@@ -369,13 +369,10 @@ export function HomePage() {
           {/* FIX 9: story copy block */}
           <div className="max-w-2xl mx-auto text-center mb-12">
             <p className="font-sans text-ink-muted text-lg mb-4">
-              After thirty years in this industry, we have seen every trick in the book. The canvassing calls. The evening appointments. The price that starts at £4,000 and somehow becomes £1,800 after the manager gets involved. If you have ever sat through that experience you will know exactly what we mean.
+              After 30 years in the industry we've seen it all. A £4,000 quote miraculously becomes £1,800 once the 'manager' gets involved.
             </p>
             <p className="font-sans text-ink-muted text-lg mb-4">
-              White Gold was a television show. For millions of homeowners it was a Tuesday night.
-            </p>
-            <p className="font-sans text-ink-muted text-lg mb-4">
-              We built Windows &amp; Doors Online because we believe there is a better way. One honest price. One vetted installer. No drama.
+              We built Windows &amp; Doors Online because we believe there is a better way. One honest price. One vetted installer. No special offers. No drama.
             </p>
           </div>
 
