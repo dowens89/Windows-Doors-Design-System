@@ -451,7 +451,7 @@ export function HomePage() {
               {
                 n: '03',
                 heading: 'Your installer gets in touch',
-                body: 'A surveyor — not a salesperson — visits to confirm measurements. In most standard jobs, the price you saw online is the price you pay.',
+                body: 'A surveyor - not a salesperson - visits to confirm measurements. In most standard jobs, the price you saw online is the price you pay.',
               },
             ].map((step, i) => (
               <React.Fragment key={step.n}>
@@ -479,7 +479,7 @@ export function HomePage() {
       <section className="bg-paper py-12 px-8">
         <div className="max-w-[1200px] mx-auto">
           <h2 className="font-display text-3xl text-ink">What are you looking for?</h2>
-          <p className="font-sans text-ink-muted mt-2 mb-8">Browse by product type</p>
+          <p className="font-sans text-ink-muted mt-2 mb-8">Browse our top product ranges</p>
 
           <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible">
             {[
@@ -548,21 +548,21 @@ export function HomePage() {
             {[
               {
                 quote:
-                  'No hard sell, no sitting in my living room for three hours. Just a clear price and a great fitting team.',
-                author: 'Sarah T.',
+                  'Game changer! No haggling, I built my order on the site and then the surveyor from Star confirmed it when measuring. Fit within 4 weeks.',
+                author: 'Sarah C.',
                 location: 'Ilkley',
               },
               {
                 quote:
                   'I knew exactly what I was paying before anyone came to the house. First time I\'ve not felt pressured buying windows.',
-                author: 'James K.',
-                location: 'Leeds',
+                author: 'Mo K.',
+                location: 'Shipley',
               },
               {
                 quote:
-                  'The price I saw online was the price I paid. Refreshingly straightforward.',
-                author: 'Michelle B.',
-                location: 'Harrogate',
+                  'Refreshingly straightforward. I was recommended by a colleague and finally replaced the windows I\'d been putting off',
+                author: 'Caz T',
+                location: 'Bradford',
               },
             ].map((review) => (
               <div key={review.author} className="bg-brand rounded-sm p-8">
@@ -598,15 +598,15 @@ export function HomePage() {
             {[
               {
                 quote:
-                  'The leads that come through are warm. The customer has already seen a price and decided they want to proceed. That changes the whole conversation.',
-                name: 'James R.',
-                role: 'Independent installer · Leeds',
+                  'This is so much easier. The customer has already seen a price and decided they want to proceed. That changes the whole conversation. I want to install windows, not sell and this is perfect for that',
+                name: 'Dave',
+                role: 'Installer - Huddersfield',
               },
               {
                 quote:
-                  'I was spending £200 a week on canvassing leads that went nowhere. This is completely different. The customer chose us.',
-                name: 'Mark T.',
-                role: 'Window and door specialist · Bradford',
+                  'I was spending hours sitting leads that ghosted me. This is completely different, the customer knows if they can afford it before I even call them',
+                name: 'Ali',
+                role: 'Installer - Bradford',
               },
             ].map((q) => (
               <div key={q.name} className="bg-paper border border-hairline p-8">
@@ -626,7 +626,7 @@ export function HomePage() {
           <h2 className="font-display text-4xl text-paper mb-4">Ready to see your price?</h2>
           <p className="font-sans text-paper opacity-80 text-lg mb-8 max-w-xl mx-auto">
             No salesperson will call you. No appointment until you are ready. Just an honest
-            installed price for your home.
+            installed price for your home. Shop for Windows & Doors like you would anything else.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
