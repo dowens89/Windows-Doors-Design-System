@@ -487,9 +487,9 @@ export function HomePage() {
           <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible">
             {[
               {
-                name: 'Casement Windows',
+                name: 'UPVC Casement Windows',
                 from: '£450',
-                image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780466324/HP-UPVC-windows_bz9gj7.jpg',
                 to: '/windows/casement-windows',
               },
               {
