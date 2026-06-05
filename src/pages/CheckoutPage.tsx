@@ -78,6 +78,12 @@ export function CheckoutPage() {
     const reference = `WDO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
 
     try {
+      const productReference = items
+        .map((item) => item.selectedVariants?.productReference)
+        .filter(Boolean)
+        .join(', ')
+        .slice(0, 200) || null
+
       const { error } = await supabase.from('quote_requests').insert({
         reference,
         name: form.name,
@@ -91,6 +97,7 @@ export function CheckoutPage() {
         indicative_total: total,
         notes: form.notes || '',
         status: 'new',
+        product_reference: productReference,
       })
 
       if (error) {
