@@ -14,6 +14,7 @@ interface ConfirmationState {
   name: string
   items: BasketItem[]
   total: number
+  submitted: boolean
 }
 
 export function ConfirmationPage() {
@@ -27,10 +28,10 @@ export function ConfirmationPage() {
   const state = location.state as ConfirmationState | null
 
   useEffect(() => {
-    if (!state) navigate('/', { replace: true })
+    if (!state?.submitted) navigate('/', { replace: true })
   }, [state, navigate])
 
-  if (!state) return null
+  if (!state?.submitted) return null
 
   const firstName = state.name.split(' ')[0]
 

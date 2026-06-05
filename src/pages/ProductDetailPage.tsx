@@ -1,10 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Check, AlertCircle, ChevronDown, ChevronUp, Search } from 'lucide-react'
+import { Check, AlertCircle, Search } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { SchemaTag } from '../components/SchemaTag'
 import { Button } from '../components/ds/Button'
-import { Badge } from '../components/ds/Badge'
 import { Alert } from '../components/ds/Alert'
 import { FAQ } from '../components/ds/FAQ'
 import { PriceDisplay } from '../components/ds/PriceDisplay'
@@ -27,7 +26,6 @@ const PRODUCT_SLUG_TO_SKU: Record<string, string> = {
   'composite-doors': 'CD-08',
   'upvc-doors':      'CD-146',
   'french-doors':    'CD-70',
-  'bi-fold-doors':   'CD-54',
   'patio-doors':     'CD-39',
 }
 
@@ -69,7 +67,14 @@ function calcWindowEnginePrice(
     const colourType = colourOpt ? resolveColourType(colourOpt.priceModifier) : 'white'
 
     const openerVariant = product.variants.find((v) => v.id === 'openers')
-    const openers = openerVariant ? parseInt(selections[openerVariant.id] ?? '0', 10) || 0 : 0
+    const openerIdToCount: Record<string, number> = {
+      no_opener: 0,
+      one_opener: 1,
+      two_openers: 2,
+      three_openers: 3,
+    }
+    const openerRawId = openerVariant ? (selections[openerVariant.id] ?? 'no_opener') : 'no_opener'
+    const openers = openerIdToCount[openerRawId] ?? (parseInt(openerRawId, 10) || 0)
 
     const midRailVariant = product.variants.find((v) => v.id === 'mid_rail')
     const midRail = midRailVariant ? selections[midRailVariant.id] === 'true' : false
@@ -123,8 +128,8 @@ function calcDoorEnginePrice(
 
     const result = calculateDoorPrice(input, doorData)
     return { value: result.totalPriceRounded, fromEngine: true, error: null }
-  } catch (e) {
-    return { value: 0, fromEngine: false, error: e instanceof Error ? e.message : 'Pricing error' }
+  } catch {
+    return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
   }
 }
 
@@ -136,7 +141,11 @@ const STEP_TYPE_LABELS: Record<string, string> = {
   size: 'Size',
   panels: 'Panels',
   sidePanels: 'Side Panels',
+  addon: 'Options',
 }
+
+const COMMON_WIDTHS_MM = [500, 600, 700, 750, 800, 900, 1000, 1050, 1100, 1200]
+const COMMON_HEIGHTS_MM = [800, 900, 1000, 1050, 1100, 1200, 1300, 1400, 1500]
 
 interface StepDotProps {
   index: number
@@ -206,8 +215,12 @@ export function ProductDetailPage() {
 
   const [currentStep, setCurrentStep] = useState(0)
   const [measureUnit, setMeasureUnit] = useState<'MM' | 'CM'>('MM')
-  const [measurement, setMeasurement] = useState({ width: '', height: '' })
+  const [widthSelect, setWidthSelect] = useState('900')
+  const [heightSelect, setHeightSelect] = useState('1200')
+  const [widthCustom, setWidthCustom] = useState('')
+  const [heightCustom, setHeightCustom] = useState('')
   const [added, setAdded] = useState(false)
+  const sizeStepRef = useRef<HTMLDivElement>(null)
 
   // Sticky header scroll detection
   useEffect(() => {
@@ -223,14 +236,15 @@ export function ProductDetailPage() {
   const priceState = useMemo((): PriceState => {
     if (!product) return { value: 0, fromEngine: false, error: null }
 
-    const toMm = (val: string) => {
-      if (!val) return 0
-      const n = parseFloat(val)
+    const toMm = (select: string, custom: string) => {
+      const raw = select === 'custom' ? custom : select
+      if (!raw) return 0
+      const n = parseFloat(raw)
       return isNaN(n) ? 0 : measureUnit === 'CM' ? n * 10 : n
     }
 
-    const widthMm = toMm(measurement.width)
-    const heightMm = toMm(measurement.height)
+    const widthMm = toMm(widthSelect, widthCustom)
+    const heightMm = toMm(heightSelect, heightCustom)
     const hasMeasurements = widthMm > 0 && heightMm > 0
 
     if (product.category === 'windows') {
@@ -248,7 +262,7 @@ export function ProductDetailPage() {
     }
 
     return { value: calcFallbackPrice(product, selections), fromEngine: false, error: null }
-  }, [product, selections, measurement, measureUnit, windowData, doorData])
+  }, [product, selections, widthSelect, heightSelect, widthCustom, heightCustom, measureUnit, windowData, doorData])
 
   if (!product) {
     return (
@@ -314,6 +328,21 @@ export function ProductDetailPage() {
       quantity: 1,
     })
     setAdded(true)
+  }
+
+  function handleAddAnother() {
+    // Reset size inputs only, keep other selections
+    setWidthSelect('900')
+    setHeightSelect('1200')
+    setWidthCustom('')
+    setHeightCustom('')
+    setAdded(false)
+    // Jump to size step (last step)
+    const sizeStepIndex = totalSteps - 1
+    setCurrentStep(sizeStepIndex)
+    setTimeout(() => {
+      sizeStepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
   }
 
   const stepLabels = [
@@ -392,10 +421,17 @@ export function ProductDetailPage() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <Badge variant="accreditation">FENSA Registered</Badge>
-              <Badge variant="verified">Vetted Installer Network</Badge>
-              <Badge variant="accreditation">Insurance Backed Guarantee</Badge>
+            <div className="flex flex-col gap-2.5 mt-4">
+              {[
+                'FENSA Registered Installers',
+                'Vetted Installer Network',
+                'Insurance Backed Guarantee',
+              ].map((text) => (
+                <div key={text} className="flex items-center gap-2">
+                  <Check className="text-brand w-4 h-4 flex-shrink-0" strokeWidth={2.5} />
+                  <span className="font-sans text-sm text-ink">{text}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -409,7 +445,7 @@ export function ProductDetailPage() {
             </p>
 
             {/* Step panel */}
-            <div className="bg-surface rounded-sm border border-hairline p-6 md:p-8 mb-6">
+            <div ref={sizeStepRef} className="bg-surface rounded-sm border border-hairline p-6 md:p-8 mb-6">
               {/* Step label */}
               <p className="font-mono text-xs text-brand uppercase tracking-widest mb-1">
                 Step {String(currentStep + 1).padStart(2, '0')} of {String(totalSteps).padStart(2, '0')}
@@ -419,7 +455,7 @@ export function ProductDetailPage() {
                 <>
                   <h2 className="font-display text-2xl text-ink mb-2">Your window size</h2>
                   <p className="font-sans text-sm text-ink-muted mb-6">
-                    Enter your existing frame dimensions for an accurate installed price. Not sure? Skip this step — your surveyor will measure on-site.
+                    Select your existing frame dimensions for an accurate installed price. Not sure? Choose the closest size — your surveyor will confirm on-site.
                   </p>
                   {/* Unit toggle */}
                   <div className="flex gap-2 mb-5">
@@ -442,28 +478,52 @@ export function ProductDetailPage() {
                       <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
                         Width ({measureUnit})
                       </label>
-                      <input
-                        type="number"
-                        value={measurement.width}
-                        onChange={(e) => setMeasurement((m) => ({ ...m, width: e.target.value }))}
+                      <select
+                        value={widthSelect}
+                        onChange={(e) => setWidthSelect(e.target.value)}
                         className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2.5 rounded focus:outline-none focus:border-brand"
-                        placeholder="e.g. 900"
-                      />
+                      >
+                        {(measureUnit === 'CM' ? COMMON_WIDTHS_MM.map((v) => v / 10) : COMMON_WIDTHS_MM).map((v) => (
+                          <option key={v} value={String(v)}>{v} {measureUnit}</option>
+                        ))}
+                        <option value="custom">Custom size</option>
+                      </select>
+                      {widthSelect === 'custom' && (
+                        <input
+                          type="number"
+                          value={widthCustom}
+                          onChange={(e) => setWidthCustom(e.target.value)}
+                          placeholder={`e.g. ${measureUnit === 'CM' ? '95' : '950'}`}
+                          className="mt-2 w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2.5 rounded focus:outline-none focus:border-brand"
+                        />
+                      )}
                     </div>
                     <div>
                       <label className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-muted block mb-1">
                         Height ({measureUnit})
                       </label>
-                      <input
-                        type="number"
-                        value={measurement.height}
-                        onChange={(e) => setMeasurement((m) => ({ ...m, height: e.target.value }))}
+                      <select
+                        value={heightSelect}
+                        onChange={(e) => setHeightSelect(e.target.value)}
                         className="w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2.5 rounded focus:outline-none focus:border-brand"
-                        placeholder="e.g. 1200"
-                      />
+                      >
+                        {(measureUnit === 'CM' ? COMMON_HEIGHTS_MM.map((v) => v / 10) : COMMON_HEIGHTS_MM).map((v) => (
+                          <option key={v} value={String(v)}>{v} {measureUnit}</option>
+                        ))}
+                        <option value="custom">Custom size</option>
+                      </select>
+                      {heightSelect === 'custom' && (
+                        <input
+                          type="number"
+                          value={heightCustom}
+                          onChange={(e) => setHeightCustom(e.target.value)}
+                          placeholder={`e.g. ${measureUnit === 'CM' ? '120' : '1200'}`}
+                          className="mt-2 w-full border border-hairline bg-paper font-sans text-sm text-ink px-3 py-2.5 rounded focus:outline-none focus:border-brand"
+                        />
+                      )}
                     </div>
                   </div>
-                  <p className="font-sans text-xs text-ink-subtle">
+                  <p className="font-sans text-xs text-ink-muted">
                     Measure the existing frame, not the glass
                   </p>
                 </>
@@ -472,7 +532,7 @@ export function ProductDetailPage() {
                   <h2 className="font-display text-2xl text-ink mb-2">
                     Choose your {STEP_TYPE_LABELS[currentVariant.type]?.toLowerCase() ?? currentVariant.label.toLowerCase()}
                   </h2>
-                  <p className="font-sans text-sm text-ink-muted mb-6">
+                  <p className="font-sans text-sm text-ink-muted mb-4">
                     {currentVariant.type === 'colour'
                       ? 'All colours include matching hardware. Premium finishes add to the base price.'
                       : currentVariant.type === 'glazing'
@@ -481,6 +541,12 @@ export function ProductDetailPage() {
                       ? 'Select the opening configuration that suits your room.'
                       : `Select your preferred ${currentVariant.label.toLowerCase()}.`}
                   </p>
+
+                  {currentVariant.type === 'colour' && (
+                    <div className="bg-surface border border-hairline rounded-sm p-3 mb-6 text-sm font-sans text-ink-muted">
+                      All colours apply externally. Our standard windows are white inside — the colour you choose is for the outside face only.
+                    </div>
+                  )}
 
                   {currentVariant.type === 'colour' ? (
                     <>
@@ -546,27 +612,27 @@ export function ProductDetailPage() {
                             onClick={() => setSelections((s) => ({ ...s, [currentVariant.id]: opt.id }))}
                             className={`flex flex-col items-start p-4 border rounded transition-all text-left focus:outline-none ${
                               isSelected
-                                ? 'border-brand bg-brand bg-opacity-5'
+                                ? 'border-brand bg-brand'
                                 : 'border-hairline bg-paper hover:border-brand hover:bg-brand hover:bg-opacity-5'
                             }`}
                           >
                             {isSelected && (
-                              <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center mb-2">
+                              <div className="w-5 h-5 rounded-full bg-paper bg-opacity-20 flex items-center justify-center mb-2">
                                 <Check className="w-3 h-3 text-paper" strokeWidth={2.5} />
                               </div>
                             )}
                             {!isSelected && (
                               <div className="w-5 h-5 rounded-full border-2 border-hairline mb-2" />
                             )}
-                            <span className="font-sans text-sm font-medium text-ink">{opt.label}</span>
+                            <span className={`font-sans text-sm font-medium ${isSelected ? 'text-paper' : 'text-ink'}`}>{opt.label}</span>
                             {opt.priceModifier > 0 && (
-                              <span className="font-sans text-xs text-ink-muted mt-0.5">+ £{opt.priceModifier}</span>
+                              <span className={`font-sans text-xs mt-0.5 ${isSelected ? 'text-paper text-opacity-80' : 'text-ink-muted'}`}>+ £{opt.priceModifier}</span>
                             )}
                             {opt.priceModifier < 0 && (
-                              <span className="font-sans text-xs text-ink-muted mt-0.5">- £{Math.abs(opt.priceModifier)}</span>
+                              <span className={`font-sans text-xs mt-0.5 ${isSelected ? 'text-paper text-opacity-80' : 'text-ink-muted'}`}>- £{Math.abs(opt.priceModifier)}</span>
                             )}
                             {opt.priceModifier === 0 && (
-                              <span className="font-sans text-xs text-ink-subtle mt-0.5">Included</span>
+                              <span className={`font-sans text-xs mt-0.5 ${isSelected ? 'text-paper text-opacity-60' : 'text-ink-subtle'}`}>Included</span>
                             )}
                           </button>
                         )
@@ -581,12 +647,20 @@ export function ProductDetailPage() {
             {added ? (
               <div className="space-y-3">
                 <Alert variant="success" message="Added to your quote" />
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  onClick={handleAddAnother}
+                >
+                  Add Another — Same Spec, Different Size
+                </Button>
                 <div className="flex gap-3">
-                  <Button variant="primary" size="lg" className="flex-1" onClick={() => navigate('/basket')}>
+                  <Button variant="secondary" size="md" className="flex-1" onClick={() => navigate('/basket')}>
                     View Quote
                   </Button>
-                  <Button variant="ghost" onClick={() => setAdded(false)}>
-                    Continue browsing
+                  <Button variant="ghost" size="md" className="flex-1" onClick={() => navigate('/shop')}>
+                    Continue Browsing
                   </Button>
                 </div>
               </div>
@@ -635,8 +709,8 @@ export function ProductDetailPage() {
                     </p>
                     <PriceDisplay price={priceState.value} size="large" assuranceText="" />
                     <p className="font-sans text-xs text-ink-muted mt-1">
-                      {priceState.fromEngine && measurement.width && measurement.height
-                        ? 'Calculated from your measurements. Confirmed at survey.'
+                      {priceState.fromEngine
+                        ? 'Calculated from your size selection. Confirmed at survey.'
                         : `${product.unit} — confirmed at survey, no payment today`}
                     </p>
                   </div>

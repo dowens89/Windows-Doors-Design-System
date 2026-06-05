@@ -1,22 +1,35 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ShieldCheck, Lock, BadgeCheck } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { SchemaTag } from '../components/SchemaTag'
 import { Button } from '../components/ds/Button'
 import { Input } from '../components/ds/Input'
 import { Alert } from '../components/ds/Alert'
-import { Loading } from '../components/ds/Loading'
 import { useSEO } from '../utils/seo'
 import { localBusinessSchema } from '../utils/schema'
 import { supabase } from '../lib/supabase'
 
 const UK_POSTCODE_RE = /^[A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}$/i
-const COVERED_PREFIXES = ['LS', 'BD', 'WF', 'HD', 'HX', 'HG', 'DN', 'S72', 'S73', 'S74', 'S75']
+
+// FIX 7: expanded postcode coverage
+const COVERED_POSTCODES = [
+  // West Yorkshire
+  'LS','BD','WF','HD','HX','HG',
+  // South Yorkshire
+  'S','DN',
+  // East Yorkshire
+  'HU','YO',
+  // North Yorkshire
+  'DL','TS',
+  // Lancashire
+  'BB','PR','FY','LA','BL',
+  // Manchester
+  'M','SK','WN','WA','OL',
+]
 
 function isCovered(postcode: string): boolean {
   const upper = postcode.trim().toUpperCase().replace(/\s+/g, '')
-  return COVERED_PREFIXES.some((prefix) => upper.startsWith(prefix))
+  return COVERED_POSTCODES.some((code) => upper.startsWith(code))
 }
 
 interface QuoteResult {
@@ -80,16 +93,6 @@ export function HomePage() {
     })
   }
 
-  // ── Quote count ───────────────────────────────────────────────────
-  const [quoteCount, setQuoteCount] = useState<number | null>(null)
-
-  useEffect(() => {
-    supabase
-      .from('quote_requests')
-      .select('*', { count: 'exact', head: true })
-      .then(({ count }) => setQuoteCount(count ?? 0))
-  }, [])
-
   const fmt = (n: number) =>
     new Intl.NumberFormat('en-GB', {
       style: 'currency',
@@ -102,7 +105,7 @@ export function HomePage() {
       <SchemaTag schema={localBusinessSchema()} />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section className="flex flex-col md:flex-row min-h-[600px] md:min-h-screen">
+      <section className="flex flex-col md:flex-row min-h-[500px] md:min-h-[500px]">
         {/* Mobile image — appears above content */}
         <div className="block md:hidden w-full h-[280px] overflow-hidden flex-shrink-0">
           <img
@@ -113,7 +116,7 @@ export function HomePage() {
         </div>
 
         {/* Left: content */}
-        <div className="bg-brand flex flex-col justify-center px-8 py-16 md:px-12 md:py-20 w-full md:w-[55%]">
+        <div className="bg-brand flex flex-col justify-center px-8 py-7 md:px-12 md:py-10 w-full md:w-[55%]">
           <p className="font-mono text-xs text-paper opacity-70 uppercase tracking-widest mb-6">
             No Salesperson · Transparent Pricing · One Installer
           </p>
@@ -126,48 +129,41 @@ export function HomePage() {
 
           <p className="font-sans text-lg text-paper opacity-80 mt-6 max-w-md leading-relaxed">
             We show you honest installed prices for windows and doors online. You choose what you want. We match you with a local installer who will carry out a survey.
-            No cold calls. 
-            No fake discounts. 
+            No cold calls.
+            No fake discounts.
             No pressure.
           </p>
 
+          {/* FIX 2: resized buttons with border and shadow; FIX 2 scroll behaviour on second button */}
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <Button
               variant="primary"
               size="lg"
-              style={{ backgroundColor: 'var(--color-accent)', borderColor: 'var(--color-accent)' }}
+              className="px-8 border border-paper border-opacity-40 shadow-lg"
+              style={{ backgroundColor: 'var(--color-accent)', borderColor: 'rgba(240,237,232,0.4)' }}
               onClick={() => navigate('/shop')}
             >
-              Browse Products & build your order
+              Browse Products
             </Button>
             <Button
               variant="ghost"
               size="lg"
-              className="text-paper border border-paper border-opacity-60 hover:border-opacity-100"
-              onClick={() => navigate('/quick-quote')}
+              className="px-8 text-paper border border-paper border-opacity-40 shadow-lg hover:border-opacity-100"
+              onClick={() => {
+                document.getElementById('quick-quote-section')
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }}
             >
-              Get a quick quote
+              Get a Quick Quote
             </Button>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-5 mt-10">
-            {[
-              { icon: ShieldCheck, text: 'Shop the range' },
-              { icon: BadgeCheck, text: 'Price shown upfront' },
-              { icon: Lock, text: 'No payment today' },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className="inline-flex items-center gap-2">
-                <Icon className="w-4 h-4 text-paper shrink-0 opacity-80" strokeWidth={1.5} />
-                <span className="font-sans text-sm text-paper opacity-80">{text}</span>
-              </div>
-            ))}
-          </div>
+          {/* FIX 1: trust signal icons removed */}
         </div>
 
         {/* Right: image — desktop only */}
         <div className="hidden md:block w-[45%] overflow-hidden">
           <img
-            src="https://res.cloudinary.com/dw0wt42ns/image/upload/v1780422068/hero-splash_xnswmo.jpg"
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=1200"
             alt="Composite door installed on a residential home"
             className="w-full h-full object-cover"
           />
@@ -182,7 +178,7 @@ export function HomePage() {
               <div>
                 <p className="font-display text-xl text-ink">Do we cover your area?</p>
                 <p className="font-sans text-sm text-ink-muted mt-1">
-                  Currently serving West Yorkshire, South Yorkshire, East Yorkshire, North Yorkshire, Lancashire and Manchester
+                  Currently serving West Yorkshire, South Yorkshire, East Yorkshire, North Yorkshire, Lancashire and Manchester.
                 </p>
               </div>
               <div className="flex gap-3 sm:ml-auto items-end">
@@ -204,7 +200,7 @@ export function HomePage() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <Alert
                 variant="success"
-                message="Great news — we cover your area. Browse products to get started."
+                message="Great news — we cover your area. We serve West Yorkshire, South Yorkshire, East Yorkshire, North Yorkshire, Lancashire and Manchester."
                 className="flex-1"
               />
               <Button variant="secondary" size="sm" onClick={() => navigate('/shop')}>
@@ -221,7 +217,7 @@ export function HomePage() {
               <div className="flex-1">
                 <Alert
                   variant="info"
-                  message="We're not in your area yet — but we're expanding."
+                  message="We are not in your area yet but we are expanding. Register your interest and we will let you know when we launch near you."
                 />
               </div>
               <div className="flex gap-3 items-end">
@@ -245,7 +241,8 @@ export function HomePage() {
       </section>
 
       {/* ── QUICK QUOTE ──────────────────────────────────────────── */}
-      <section className="bg-brand py-16 px-8">
+      {/* FIX 3: id added for scroll target */}
+      <section id="quick-quote-section" className="bg-brand py-16 px-8">
         <div className="max-w-3xl mx-auto text-center">
           <span className="bg-accent text-paper font-sans text-xs uppercase tracking-wider px-3 py-1 rounded-sm inline-block mb-4">
             Instant Estimate
@@ -257,110 +254,131 @@ export function HomePage() {
             No contact details needed. Takes 30 seconds. Price is indicative based on average costs, get your full fixed price by shopping our range!
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            {[
-              { label: 'Windows', value: windows, set: setWindows, max: 20 },
-              { label: 'Doors', value: doors, set: setDoors, max: 10 },
-              { label: 'Composite Doors', value: compositeDoors, set: setCompositeDoors, max: 5 },
-            ].map(({ label, value, set, max }) => (
-              <div key={label} className="bg-white bg-opacity-10 rounded-sm p-4">
-                <label className="font-sans text-xs text-paper uppercase tracking-wide mb-2 block">
-                  {label}
+          {/* FIX 6: lifted card container */}
+          <div className="bg-paper rounded-sm shadow-xl p-8 md:p-12">
+            {/* FIX 4: number inputs clear zero on focus */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              {[
+                { label: 'Windows', value: windows, set: setWindows, max: 20 },
+                { label: 'Doors', value: doors, set: setDoors, max: 10 },
+                { label: 'Composite Doors', value: compositeDoors, set: setCompositeDoors, max: 5 },
+              ].map(({ label, value, set, max }) => (
+                <div key={label} className="bg-surface border border-hairline rounded-sm p-4">
+                  <label className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-2 block">
+                    {label}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={max}
+                    value={value}
+                    placeholder="0"
+                    onChange={(e) => set(Math.max(0, parseInt(e.target.value) || 0))}
+                    onFocus={(e) => { if (e.target.value === '0') e.target.value = '' }}
+                    onBlur={(e) => { if (e.target.value === '') { e.target.value = '0'; set(0) } }}
+                    className="bg-transparent text-ink text-2xl font-mono text-center border-b border-hairline w-full focus:outline-none focus:border-brand transition-all"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="max-w-xs mx-auto mb-2">
+              <div className="bg-surface border border-hairline rounded-sm p-4">
+                <label className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-2 block">
+                  Your Postcode
                 </label>
                 <input
-                  type="number"
-                  min={0}
-                  max={max}
-                  value={value}
-                  onChange={(e) => set(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="bg-transparent text-paper text-2xl font-mono text-center border-b border-paper border-opacity-30 w-full focus:outline-none focus:border-opacity-100 transition-all"
+                  type="text"
+                  placeholder="e.g. LS1 4AB"
+                  value={quotePostcode}
+                  onChange={(e) => setQuotePostcode(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCalculate()}
+                  className="bg-transparent text-ink text-lg font-mono text-center border-b border-hairline w-full focus:outline-none focus:border-brand transition-all placeholder:text-ink-muted"
                 />
               </div>
-            ))}
-          </div>
-
-          <div className="max-w-xs mx-auto mb-2">
-            <div className="bg-white bg-opacity-10 rounded-sm p-4">
-              <label className="font-sans text-xs text-paper uppercase tracking-wide mb-2 block">
-                Your Postcode
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. LS1 4AB"
-                value={quotePostcode}
-                onChange={(e) => setQuotePostcode(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCalculate()}
-                className="bg-transparent text-paper text-lg font-mono text-center border-b border-paper border-opacity-30 w-full focus:outline-none focus:border-opacity-100 transition-all placeholder:text-paper placeholder:opacity-40"
-              />
             </div>
-          </div>
 
-          {quoteErrors.items && (
-            <p className="font-sans text-sm text-accent mt-2">{quoteErrors.items}</p>
-          )}
-          {quoteErrors.postcode && (
-            <p className="font-sans text-sm text-accent mt-1">{quoteErrors.postcode}</p>
-          )}
+            {quoteErrors.items && (
+              <p className="font-sans text-sm text-accent mt-2">{quoteErrors.items}</p>
+            )}
+            {quoteErrors.postcode && (
+              <p className="font-sans text-sm text-accent mt-1">{quoteErrors.postcode}</p>
+            )}
 
-          <div className="mt-8">
-            <Button
-              variant="accent"
-              size="lg"
-              className="w-full max-w-xs"
-              onClick={handleCalculate}
-            >
-              Calculate My Estimate
-            </Button>
-          </div>
-
-          {quoteResult && (
-            <div className="bg-white bg-opacity-15 rounded-sm p-8 mt-8 text-center">
-              <p className="font-sans text-paper text-sm uppercase tracking-wide mb-4">
-                Your indicative installed price
-              </p>
-              <div className="flex items-baseline justify-center gap-4 flex-wrap">
-                <span className="font-mono text-5xl text-paper font-medium">
-                  {fmt(quoteResult.low)}
-                </span>
-                <span className="font-sans text-2xl text-paper opacity-70">to</span>
-                <span className="font-mono text-5xl text-paper font-medium">
-                  {fmt(quoteResult.high)}
-                </span>
-              </div>
-              <p className="font-sans text-paper opacity-60 text-sm mt-4">
-                Based on standard installation costs. Your surveyor confirms before any
-                work begins.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <Button
-                  variant="primary"
-                  style={{ backgroundColor: 'var(--color-paper)', color: 'var(--color-brand)' }}
-                  onClick={() => navigate('/shop')}
-                >
-                  Get Itemised Quote
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-paper border border-paper border-opacity-60 hover:border-opacity-100"
-                  onClick={() => navigate('/pricing-promise')}
-                >
-                  Learn How Pricing Works
-                </Button>
-              </div>
+            {/* FIX 5: button label updated */}
+            <div className="mt-8">
+              <Button
+                variant="accent"
+                size="lg"
+                className="w-full max-w-xs"
+                onClick={handleCalculate}
+              >
+                Calculate My Instant Estimate
+              </Button>
             </div>
-          )}
+
+            {quoteResult && (
+              <div className="bg-brand rounded-sm p-8 mt-8 text-center">
+                <p className="font-sans text-paper text-sm uppercase tracking-wide mb-4">
+                  Your indicative installed price
+                </p>
+                <div className="flex items-baseline justify-center gap-4 flex-wrap">
+                  <span className="font-mono text-5xl text-paper font-medium">
+                    {fmt(quoteResult.low)}
+                  </span>
+                  <span className="font-sans text-2xl text-paper opacity-70">to</span>
+                  <span className="font-mono text-5xl text-paper font-medium">
+                    {fmt(quoteResult.high)}
+                  </span>
+                </div>
+                <p className="font-sans text-paper opacity-60 text-sm mt-4">
+                  Based on standard installation costs. Your surveyor confirms before any
+                  work begins.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+                  <Button
+                    variant="primary"
+                    style={{ backgroundColor: 'var(--color-paper)', color: 'var(--color-brand)' }}
+                    onClick={() => navigate('/shop')}
+                  >
+                    Get Itemised Quote
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-paper border border-paper border-opacity-60 hover:border-opacity-100"
+                    onClick={() => navigate('/pricing-promise')}
+                  >
+                    Learn How Pricing Works
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* ── HOW IT WORKS: OLD VS NEW ─────────────────────────────── */}
-      <section className="bg-ink py-16 px-8">
+      {/* FIX 8: lighter background */}
+      <section className="bg-paper py-16 px-8">
         <div className="max-w-5xl mx-auto">
-          <h2 className="font-display text-4xl text-paper text-center mb-12">
+          {/* FIX 8: heading colour updated */}
+          <h2 className="font-display text-4xl text-ink text-center mb-4">
             The old way vs the WDO way
           </h2>
 
+          {/* FIX 9: story copy block */}
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <p className="font-sans text-ink-muted text-lg mb-4">
+              After 30 years in the industry we've seen it all. A £4,000 quote miraculously becomes £1,800 once the 'manager' gets involved.
+            </p>
+            <p className="font-sans text-ink-muted text-lg mb-4">
+              We built Windows &amp; Doors Online because we believe there is a better way. One honest price. One vetted installer. No special offers. No drama.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="border border-white border-opacity-10 p-8">
+            {/* FIX 8: traditional column uses mid-grey */}
+            <div className="bg-gray-100 border border-gray-200 p-8">
               <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-6">
                 Traditional double glazing
               </p>
@@ -373,16 +391,17 @@ export function HomePage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="flex items-start gap-3 py-3 border-b border-white border-opacity-10 last:border-0"
+                  className="flex items-start gap-3 py-3 border-b border-gray-200 last:border-0"
                 >
                   <span className="w-5 h-5 flex-shrink-0 bg-accent text-paper text-xs flex items-center justify-center mt-0.5 font-mono">
                     ✕
                   </span>
-                  <span className="font-sans text-paper opacity-60">{item}</span>
+                  <span className="font-sans text-ink opacity-70">{item}</span>
                 </div>
               ))}
             </div>
 
+            {/* FIX 8: WDO column keeps bg-brand */}
             <div className="bg-brand p-8">
               <p className="font-sans text-xs text-paper opacity-70 uppercase tracking-wide mb-6">
                 Windows &amp; Doors Online
@@ -410,7 +429,7 @@ export function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS: THREE STEPS ────────────────────────────── */}
-      <section className="bg-paper py-16 px-8">
+      <section className="bg-surface py-16 px-8">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-display text-4xl text-ink text-center mb-4">How it works</h2>
           <p className="font-sans text-ink-muted text-center mb-16 max-w-xl mx-auto">
@@ -432,12 +451,12 @@ export function HomePage() {
               {
                 n: '03',
                 heading: 'Your installer gets in touch',
-                body: 'A surveyor — not a salesperson — visits to confirm measurements. In most standard jobs, the price you saw online is the price you pay.',
+                body: 'A surveyor - not a salesperson - visits to confirm measurements. In most standard jobs, the price you saw online is the price you pay.',
               },
             ].map((step, i) => (
               <React.Fragment key={step.n}>
                 <div>
-                  <span className="font-display text-6xl text-brand opacity-20 leading-none mb-4 block">
+                  <span className="font-mono text-6xl text-brand opacity-20 leading-none mb-4 block">
                     {step.n}
                   </span>
                   <h3 className="font-display text-2xl text-ink mb-3">{step.heading}</h3>
@@ -455,55 +474,45 @@ export function HomePage() {
       </section>
 
       {/* ── PRODUCT CATEGORIES ───────────────────────────────────── */}
-      <section className="bg-surface py-12 px-8">
+      {/* FIX 11 + FIX 13 Step 4: product cards, bi-fold replaced by patio */}
+      <section className="bg-paper py-12 px-8">
         <div className="max-w-[1200px] mx-auto">
           <h2 className="font-display text-3xl text-ink">What are you looking for?</h2>
-          <p className="font-sans text-ink-muted mt-2 mb-8">Browse by product type</p>
+          <p className="font-sans text-ink-muted mt-2 mb-8">Browse our top product ranges</p>
 
-          <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-5 md:overflow-visible">
+          <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-4 md:overflow-visible">
             {[
               {
-                name: 'Casement Windows',
+                name: 'UPVC Casement Windows',
                 from: '£450',
-                image:
-                  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780466324/HP-UPVC-windows_bz9gj7.jpg',
                 to: '/windows/casement-windows',
               },
               {
                 name: 'Sash Windows',
                 from: '£650',
-                image:
-                  'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780466608/HP-Sash-windows_oybg3t.webp',
                 to: '/windows/sash-windows',
               },
               {
                 name: 'Composite Doors',
                 from: '£1,195',
-                image:
-                  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780466609/HP-composite-door_sfdcki.jpg',
                 to: '/doors/composite-doors',
               },
               {
-                name: 'French Doors',
-                from: '£1,100',
-                image:
-                  'https://images.unsplash.com/photo-1600607687644-c7171b42498b?auto=format&fit=crop&q=80&w=600',
-                to: '/doors/french-doors',
-              },
-              {
-                name: 'Bi-Fold Doors',
-                from: '£2,200',
-                image:
-                  'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=600',
-                to: '/doors/bi-fold-doors',
+                name: 'French & Patio Doors',
+                from: '£950',
+                image: 'https://res.cloudinary.com/dw0wt42ns/image/upload/v1780469367/HP-French-door_pbbsvx.jpg',
+                to: '/doors/patio-doors',
               },
             ].map((cat) => (
               <Link
                 key={cat.name}
                 to={cat.to}
-                className="group relative flex-shrink-0 w-48 md:w-auto overflow-hidden cursor-pointer border border-transparent hover:border-accent transition-colors duration-300"
+                className="group flex-shrink-0 w-48 md:w-auto bg-paper border border-hairline rounded-sm overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               >
-                <div className="aspect-[4/3] overflow-hidden">
+                <div className="aspect-video overflow-hidden">
                   <img
                     src={cat.image}
                     alt={cat.name}
@@ -511,17 +520,10 @@ export function HomePage() {
                     loading="lazy"
                   />
                 </div>
-                <div
-                  className="absolute inset-0 flex flex-col justify-end p-4"
-                  style={{
-                    background:
-                      'linear-gradient(to top, rgba(26,26,23,0.85) 0%, rgba(26,26,23,0) 60%)',
-                  }}
-                >
-                  <p className="font-display text-lg text-paper leading-tight">{cat.name}</p>
-                  <p className="font-mono text-sm text-paper opacity-80">
-                    From {cat.from} installed
-                  </p>
+                <div className="bg-paper p-4">
+                  <p className="font-display text-lg text-ink leading-tight">{cat.name}</p>
+                  <p className="font-mono text-sm text-brand mt-1">From {cat.from} installed</p>
+                  <p className="font-sans text-ink-muted text-xs mt-2">View range →</p>
                 </div>
               </Link>
             ))}
@@ -529,35 +531,7 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF BAR ─────────────────────────────────────── */}
-      <section className="bg-brand py-8 px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-3 gap-8 text-center">
-            <div>
-              <p className="font-mono text-3xl text-paper min-h-[2rem] flex items-center justify-center">
-                {quoteCount === null ? (
-                  <Loading className="inline-flex" />
-                ) : (
-                  quoteCount.toLocaleString()
-                )}
-              </p>
-              <p className="font-sans text-sm text-paper opacity-70 mt-1">
-                Survey requests submitted
-              </p>
-            </div>
-            <div>
-              <p className="font-mono text-3xl text-paper">4</p>
-              <p className="font-sans text-sm text-paper opacity-70 mt-1">
-                Vetted local installers
-              </p>
-            </div>
-            <div>
-              <p className="font-mono text-3xl text-paper">£0</p>
-              <p className="font-sans text-sm text-paper opacity-70 mt-1">Upfront cost to you</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* FIX 12: social proof stats bar removed */}
 
       {/* ── REVIEWS ──────────────────────────────────────────────── */}
       <section className="bg-ink py-16 px-8">
@@ -573,21 +547,21 @@ export function HomePage() {
             {[
               {
                 quote:
-                  'No hard sell, no sitting in my living room for three hours. Just a clear price and a great fitting team.',
-                author: 'Sarah T.',
+                  'Game changer! No haggling, I built my order on the site and then the surveyor from Star confirmed it when measuring. Fit within 4 weeks.',
+                author: 'Sarah C.',
                 location: 'Ilkley',
               },
               {
                 quote:
                   'I knew exactly what I was paying before anyone came to the house. First time I\'ve not felt pressured buying windows.',
-                author: 'James K.',
-                location: 'Leeds',
+                author: 'Mo K.',
+                location: 'Shipley',
               },
               {
                 quote:
-                  'The price I saw online was the price I paid. Refreshingly straightforward.',
-                author: 'Michelle B.',
-                location: 'Harrogate',
+                  'Refreshingly straightforward. I was recommended by a colleague and finally replaced the windows I\'d been putting off',
+                author: 'Caz T',
+                location: 'Bradford',
               },
             ].map((review) => (
               <div key={review.author} className="bg-brand rounded-sm p-8">
@@ -623,15 +597,15 @@ export function HomePage() {
             {[
               {
                 quote:
-                  'The leads that come through are warm. The customer has already seen a price and decided they want to proceed. That changes the whole conversation.',
-                name: 'James R.',
-                role: 'Independent installer · Leeds',
+                  'This is so much easier. The customer has already seen a price and decided they want to proceed. That changes the whole conversation. I want to install windows, not sell and this is perfect for that',
+                name: 'Dave',
+                role: 'Installer - Huddersfield',
               },
               {
                 quote:
-                  'I was spending £200 a week on canvassing leads that went nowhere. This is completely different. The customer chose us.',
-                name: 'Mark T.',
-                role: 'Window and door specialist · Bradford',
+                  'I was spending hours sitting leads that ghosted me. This is completely different, the customer knows if they can afford it before I even call them',
+                name: 'Ali',
+                role: 'Installer - Bradford',
               },
             ].map((q) => (
               <div key={q.name} className="bg-paper border border-hairline p-8">
@@ -651,7 +625,7 @@ export function HomePage() {
           <h2 className="font-display text-4xl text-paper mb-4">Ready to see your price?</h2>
           <p className="font-sans text-paper opacity-80 text-lg mb-8 max-w-xl mx-auto">
             No salesperson will call you. No appointment until you are ready. Just an honest
-            installed price for your home.
+            installed price for your home. Shop for Windows & Doors like you would anything else.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
