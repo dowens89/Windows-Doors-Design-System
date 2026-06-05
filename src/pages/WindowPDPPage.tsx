@@ -163,6 +163,7 @@ export function WindowPDPPage() {
 
   // ── Price calculation ──────────────────────────────────────────────────────
   useEffect(() => {
+    setPriceError(false)
     if (!widthMm || !heightMm || !windowData) {
       setCalculatedPrice(null)
       setPriceBreakdown(null)
@@ -240,11 +241,7 @@ export function WindowPDPPage() {
       }
       case 3: {
         if (!externalColour) return ''
-        const upliftLabel =
-          externalColour.upliftType === 'white' ? 'Included'
-          : externalColour.upliftType === 'standard' ? '+20%'
-          : '+30%'
-        return `${externalColour.name} — ${upliftLabel}`
+        return externalColour.name
       }
       case 4: {
         if (!glassSelection) return ''
@@ -606,11 +603,11 @@ export function WindowPDPPage() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {([
-                      { count: 0 as const, label: 'Fixed', sub: 'No opener', price: 'Included', variant: 'fixed' as const },
-                      { count: 1 as const, label: '1 Opening Light', sub: '', price: '+ £242', variant: 'single-right' as const },
-                      { count: 2 as const, label: '2 Opening Lights', sub: '', price: '+ £484', variant: 'two-both' as const },
-                      { count: 3 as const, label: '3 Opening Lights', sub: '', price: '+ £726', variant: 'three-all' as const },
-                    ]).map(({ count, label, sub, price, variant }) => (
+                      { count: 0 as const, label: 'Fixed', sub: 'No opener', variant: 'fixed' as const },
+                      { count: 1 as const, label: '1 Opening Light', sub: '', variant: 'single-right' as const },
+                      { count: 2 as const, label: '2 Opening Lights', sub: '', variant: 'two-both' as const },
+                      { count: 3 as const, label: '3 Opening Lights', sub: '', variant: 'three-all' as const },
+                    ]).map(({ count, label, sub, variant }) => (
                       <button
                         key={count}
                         onClick={() => setOpenerCount(count)}
@@ -631,7 +628,6 @@ export function WindowPDPPage() {
                         </div>
                         <p className="font-display text-base text-ink">{label}</p>
                         {sub && <p className="font-sans text-xs text-ink-muted mt-0.5">{sub}</p>}
-                        <p className="font-mono text-xs text-ink-muted mt-1">{price}</p>
                       </button>
                     ))}
                   </div>
@@ -658,7 +654,7 @@ export function WindowPDPPage() {
                   </div>
 
                   <div className="mb-6">
-                    <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">Standard white — included</p>
+                    <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">Standard white</p>
                     <div className="flex gap-4 flex-wrap">
                       {COLOURS.white.map((c) => (
                         <button
@@ -682,7 +678,7 @@ export function WindowPDPPage() {
                   </div>
 
                   <div className="mb-6">
-                    <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">Standard colours — +20% on total</p>
+                    <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">Standard colours</p>
                     <div className="flex gap-4 flex-wrap">
                       {COLOURS.standard.map((c) => (
                         <button
@@ -706,7 +702,7 @@ export function WindowPDPPage() {
                   </div>
 
                   <div className="mb-6">
-                    <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">Premium colours — +30% on total</p>
+                    <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">Premium colours</p>
                     <div className="flex gap-4 flex-wrap">
                       {COLOURS.premium.map((c) => (
                         <button
@@ -732,19 +728,6 @@ export function WindowPDPPage() {
                   {externalColour && (
                     <div className="bg-surface border border-hairline rounded-sm p-3">
                       <p className="font-sans text-sm text-ink">{externalColour.name}</p>
-                      <p className="font-mono text-xs text-ink-muted mt-0.5">
-                        {externalColour.upliftType === 'white' ? 'Included' : externalColour.upliftType === 'standard' ? '+20%' : '+30%'}
-                      </p>
-                      {externalColour.upliftType !== 'white' && priceBreakdown && (
-                        <p className="font-mono text-sm text-accent mt-1">
-                          Currently adds {formatPrice(
-                            Math.round(
-                              (priceBreakdown.subtotal + (glassSelection?.priceModifier ?? 0) + (barSelection?.priceModifier ?? 0) + 25) *
-                              priceBreakdown.colourUpliftPct * 1.2
-                            )
-                          )} to your total
-                        </p>
-                      )}
                     </div>
                   )}
 
@@ -764,10 +747,10 @@ export function WindowPDPPage() {
 
                   <div className="grid grid-cols-3 gap-3 mb-6">
                     {([
-                      { cat: 'clear' as const, title: 'Clear', desc: 'Maximum light. Unobstructed views.', price: 'Included' },
-                      { cat: 'satin' as const, title: 'Satin', desc: 'Privacy with a clean, frosted appearance.', price: '+ £50' },
-                      { cat: 'patterned' as const, title: 'Patterned', desc: 'Decorative privacy glass. Six styles available.', price: '+ £75' },
-                    ]).map(({ cat, title, desc, price }) => (
+                      { cat: 'clear' as const, title: 'Clear', desc: 'Maximum light. Unobstructed views.' },
+                      { cat: 'satin' as const, title: 'Satin', desc: 'Privacy with a clean, frosted appearance.' },
+                      { cat: 'patterned' as const, title: 'Patterned', desc: 'Decorative privacy glass. Six styles available.' },
+                    ]).map(({ cat, title, desc }) => (
                       <button
                         key={cat}
                         onClick={() => {
@@ -803,7 +786,6 @@ export function WindowPDPPage() {
                         </div>
                         <p className="font-display text-base text-ink">{title}</p>
                         <p className="font-sans text-xs text-ink-muted mt-1 leading-relaxed">{desc}</p>
-                        <p className="font-mono text-xs text-ink-muted mt-2">{price}</p>
                       </button>
                     ))}
                   </div>
@@ -897,7 +879,6 @@ export function WindowPDPPage() {
                               />
                             </div>
                             <p className="font-sans text-xs text-ink leading-tight">{bar.label}</p>
-                            <p className="font-mono text-xs text-ink-muted mt-0.5">{bar.price}</p>
                           </button>
                         ))}
                       </div>
