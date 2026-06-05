@@ -50,7 +50,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/shop/:category" element={<ShopPage />} />
-        <Route path="/windows" element={<WindowPDPPage />} />
+        <Route path="/windows/casement-windows" element={<WindowPDPPage />} />
         <Route path="/windows/:slug" element={<ProductDetailPage />} />
         <Route path="/doors/:slug" element={<ProductDetailPage />} />
         <Route path="/quick-quote" element={<QuickQuotePage />} />
