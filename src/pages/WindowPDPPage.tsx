@@ -317,6 +317,12 @@ export function WindowPDPPage() {
     setAddedToBasket(true)
   }
 
+  // ── Navigation helper ──────────────────────────────────────────────────────
+  function goToStep(n: number) {
+    setCurrentStep(n)
+    window.scrollTo(0, 0)
+  }
+
   function handleSameSpecDifferentSize() {
     setWidthMm(null)
     setHeightMm(null)
@@ -418,12 +424,9 @@ export function WindowPDPPage() {
                 width={200}
                 height={220}
               />
-              {openerCount !== null && openerCount > 0 && (
-                <p className="text-xs text-ink-muted font-sans italic text-center max-w-[200px]">
-                  All openers shown as side-hung as standard. If you'd prefer top-hung or a specific
-                  configuration, just mention it to your surveyor — it won't affect your price.
-                </p>
-              )}
+              <p className="text-xs text-ink-muted font-sans italic text-center">
+                For illustrative purposes only. Exact design confirmed at survey.
+              </p>
             </div>
 
             {priceError && (
@@ -580,7 +583,7 @@ export function WindowPDPPage() {
                   )}
 
                   <div className="flex justify-end mt-8">
-                    <Button variant="primary" onClick={() => setCurrentStep(2)} disabled={!isStepComplete(1)}>
+                    <Button variant="primary" onClick={() => goToStep(2)} disabled={!isStepComplete(1)}>
                       Continue →
                     </Button>
                   </div>
@@ -632,9 +635,13 @@ export function WindowPDPPage() {
                     ))}
                   </div>
 
+                  <p className="font-sans text-xs text-ink-muted italic mt-4">
+                    All openers are shown as side-hung. They can be swapped to top-hung on survey at no extra cost — just mention your preference to the surveyor.
+                  </p>
+
                   <div className="flex justify-between mt-8">
                     <Button variant="ghost" onClick={() => setCurrentStep(1)}>← Back</Button>
-                    <Button variant="primary" onClick={() => setCurrentStep(3)} disabled={openerCount === null}>Continue →</Button>
+                    <Button variant="primary" onClick={() => goToStep(3)} disabled={openerCount === null}>Continue →</Button>
                   </div>
                 </div>
               )}
@@ -733,7 +740,7 @@ export function WindowPDPPage() {
 
                   <div className="flex justify-between mt-8">
                     <Button variant="ghost" onClick={() => setCurrentStep(2)}>← Back</Button>
-                    <Button variant="primary" onClick={() => setCurrentStep(4)} disabled={!externalColour}>Continue →</Button>
+                    <Button variant="primary" onClick={() => goToStep(4)} disabled={!externalColour}>Continue →</Button>
                   </div>
                 </div>
               )}
@@ -887,7 +894,7 @@ export function WindowPDPPage() {
 
                   <div className="flex justify-between mt-8">
                     <Button variant="ghost" onClick={() => setCurrentStep(3)}>← Back</Button>
-                    <Button variant="primary" onClick={() => setCurrentStep(5)} disabled={!glassSelection}>Continue →</Button>
+                    <Button variant="primary" onClick={() => goToStep(5)} disabled={!glassSelection}>Continue →</Button>
                   </div>
                 </div>
               )}
@@ -930,7 +937,7 @@ export function WindowPDPPage() {
 
                   <div className="flex justify-between mt-8">
                     <Button variant="ghost" onClick={() => setCurrentStep(4)}>← Back</Button>
-                    <Button variant="primary" onClick={() => setCurrentStep(6)} disabled={!handleColour}>Continue →</Button>
+                    <Button variant="primary" onClick={() => goToStep(6)} disabled={!handleColour}>Continue →</Button>
                   </div>
                 </div>
               )}

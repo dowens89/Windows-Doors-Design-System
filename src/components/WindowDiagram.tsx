@@ -40,8 +40,14 @@ export function WindowDiagram({
   const gh = H - fw * 2
 
   const glassOpacity = glazingStyle === 'frosted' ? 0.5 : 1
-  const barColour =
-    frameColour === '#ffffff' || frameColour === '#FFFFFF' ? '#cccccc' : frameColour
+  // Bar colours are fixed regardless of frame colour so the glass stays clearly blue
+  const BAR_COLOURS: Record<NonNullable<typeof glazingBarStyle>, string> = {
+    none:         'transparent',
+    georgian:     '#FFFFFF',
+    vertical:     '#FFFFFF',
+    diamond_lead: '#909090',
+    square_lead:  '#909090',
+  }
 
   // ─── Lights and mullion positions ─────────────────────────────────────────
   let lights: Light[] = []
@@ -108,6 +114,7 @@ export function WindowDiagram({
     if (glazingBarStyle === 'none') return null
     const { x, y, w, h } = l
     const bw = Math.max(1, W / 90)
+    const barColour = BAR_COLOURS[glazingBarStyle]
     const key = `${uid}${idx}`
 
     if (glazingBarStyle === 'vertical') {
