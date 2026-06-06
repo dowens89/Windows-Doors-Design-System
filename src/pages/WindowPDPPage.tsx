@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, Info, ChevronRight } from 'lucide-react'
+import { Check, Info, ChevronRight, Ruler, Wind, Palette, Layers, Grip, ClipboardList } from 'lucide-react'
 import { Button } from '../components/ds/Button'
 import { Input } from '../components/ds/Input'
-import { PriceDisplay } from '../components/ds/PriceDisplay'
 import { Alert } from '../components/ds/Alert'
 import {
   calculateWindowPrice,
@@ -50,6 +49,15 @@ const STEPS = [
   { number: 4, label: 'Glass' },
   { number: 5, label: 'Handle' },
   { number: 6, label: 'Review' },
+]
+
+const STEP_CONFIG = [
+  { number: 1, Icon: Ruler,         tooltip: 'Dimensions' },
+  { number: 2, Icon: Wind,          tooltip: 'Opening lights' },
+  { number: 3, Icon: Palette,       tooltip: 'Colour' },
+  { number: 4, Icon: Layers,        tooltip: 'Glass' },
+  { number: 5, Icon: Grip,          tooltip: 'Handle' },
+  { number: 6, Icon: ClipboardList, tooltip: 'Review & add' },
 ]
 
 const WIDTH_PRESETS = [500, 600, 700, 800, 900, 1000, 1100, 1200]
@@ -351,58 +359,62 @@ export function WindowPDPPage() {
             <span className="text-ink font-medium">Casement</span>
           </div>
 
-          <div className="flex items-center gap-0 flex-1 justify-center max-w-sm mx-auto">
-            {STEPS.map((step, index) => (
-              <React.Fragment key={step.number}>
-                {index > 0 && (
-                  <div
-                    className={`h-px w-6 flex-shrink-0 transition-colors duration-300 ${
-                      currentStep > step.number - 1 ? 'bg-brand' : 'bg-hairline'
-                    }`}
-                  />
-                )}
-                <button
-                  onClick={() => {
-                    if (isStepComplete(step.number - 1) || step.number <= currentStep) {
-                      setCurrentStep(step.number)
-                    }
-                  }}
-                  className="flex flex-col items-center gap-1 flex-shrink-0"
-                >
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono transition-all duration-200 ${
-                      currentStep === step.number
-                        ? 'bg-brand text-paper'
-                        : isStepComplete(step.number)
-                        ? 'bg-brand opacity-60 text-paper'
-                        : 'bg-surface border border-hairline text-ink-muted'
-                    }`}
+          <div className="flex items-center flex-1 justify-center gap-0">
+            {STEP_CONFIG.map((step, index) => {
+              const isActive = currentStep === step.number
+              const isComplete = isStepComplete(step.number)
+              const canNavigate = step.number < currentStep
+              return (
+                <React.Fragment key={step.number}>
+                  {index > 0 && (
+                    <div className={`h-px w-6 flex-shrink-0 transition-colors duration-300 ${
+                      isStepComplete(step.number - 1) && isStepComplete(step.number)
+                        ? 'bg-brand'
+                        : 'bg-hairline'
+                    }`} />
+                  )}
+                  <button
+                    onClick={() => { if (canNavigate) setCurrentStep(step.number) }}
+                    title={step.tooltip}
+                    className="relative group flex flex-col items-center"
                   >
-                    {isStepComplete(step.number) && currentStep !== step.number
-                      ? <Check className="w-3 h-3" />
-                      : step.number}
-                  </div>
-                  <span className="hidden md:block text-xs font-sans text-ink-muted leading-none">
-                    {step.label}
-                  </span>
-                </button>
-              </React.Fragment>
-            ))}
+                    <div className={`relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      isActive
+                        ? 'bg-brand text-paper ring-2 ring-brand ring-offset-2'
+                        : isComplete
+                        ? 'bg-brand text-paper'
+                        : 'bg-surface border border-hairline text-ink-muted opacity-50'
+                    }`}>
+                      <step.Icon className="w-4 h-4" />
+                      {isComplete && !isActive && (
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-paper border border-brand flex items-center justify-center">
+                          <Check className="w-2 h-2 text-brand" />
+                        </span>
+                      )}
+                    </div>
+                    <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-ink text-paper text-xs font-sans px-2 py-1 rounded-sm whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                      {step.tooltip}
+                    </span>
+                  </button>
+                </React.Fragment>
+              )
+            })}
           </div>
 
-          <div className="flex flex-col items-end flex-shrink-0 min-w-[100px]">
+          <div className="flex flex-col items-end flex-shrink-0 min-w-[90px]">
             {pricingLoading ? (
-              <div className="text-xs text-ink-muted font-sans">Loading...</div>
+              <span className="font-sans text-xs text-ink-muted italic">Loading...</span>
             ) : calculatedPrice ? (
               <>
-                <div className="text-xs text-ink-muted font-sans uppercase tracking-wide mb-0.5">Est. installed price</div>
-                <PriceDisplay price={calculatedPrice} size="inline" />
-                <div className="text-xs text-ink-muted font-sans italic mt-0.5">Inc. VAT · indicative</div>
+                <span className="font-mono text-base text-ink font-medium">
+                  {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(calculatedPrice)}
+                </span>
+                <span className="font-sans text-xs text-ink-muted italic">Inc. VAT · indicative</span>
               </>
             ) : widthMm && heightMm ? (
-              <div className="text-xs text-ink-muted font-sans italic">Calculating...</div>
+              <span className="font-sans text-xs text-ink-muted italic">Calculating...</span>
             ) : (
-              <div className="text-xs text-ink-muted font-sans italic">Enter size for price</div>
+              <span className="font-sans text-xs text-ink-muted italic">Enter size for price</span>
             )}
           </div>
 
@@ -474,7 +486,6 @@ export function WindowPDPPage() {
               {/* Step 1 — Size */}
               {currentStep === 1 && (
                 <div>
-                  <p className="font-mono text-xs text-brand uppercase tracking-widest mb-2">Step 01 of 06</p>
                   <h1 className="font-display text-3xl text-ink mb-2">What size is your window?</h1>
                   <p className="font-sans text-sm text-ink-muted mb-6">Choose from common sizes or enter exact measurements in mm.</p>
 
@@ -573,15 +584,6 @@ export function WindowPDPPage() {
                     </div>
                   </div>
 
-                  {widthMm && heightMm && bandBasePrice !== null && !priceError && (
-                    <div className="bg-brand bg-opacity-5 border border-brand rounded-sm p-3 mt-4">
-                      <p className="font-sans text-sm text-ink">Combined: {widthMm + heightMm}mm</p>
-                      <p className="font-mono text-sm text-brand mt-1">
-                        Base price from this size band: {formatPrice(bandBasePrice)}
-                      </p>
-                    </div>
-                  )}
-
                   <div className="flex justify-end mt-8">
                     <Button variant="primary" onClick={() => goToStep(2)} disabled={!isStepComplete(1)}>
                       Continue →
@@ -593,7 +595,6 @@ export function WindowPDPPage() {
               {/* Step 2 — Openers */}
               {currentStep === 2 && (
                 <div>
-                  <p className="font-mono text-xs text-brand uppercase tracking-widest mb-2">Step 02 of 06</p>
                   <h2 className="font-display text-3xl text-ink mb-2">How many opening lights?</h2>
                   <p className="font-sans text-sm text-ink-muted mb-6">An opening light is a section of the window that opens for ventilation. Fixed windows have none.</p>
 
@@ -649,7 +650,6 @@ export function WindowPDPPage() {
               {/* Step 3 — Colour */}
               {currentStep === 3 && (
                 <div>
-                  <p className="font-mono text-xs text-brand uppercase tracking-widest mb-2">Step 03 of 06</p>
                   <h2 className="font-display text-3xl text-ink mb-2">Choose your colour</h2>
                   <p className="font-sans text-sm text-ink-muted mb-6">External frame colour. All windows are white inside as standard.</p>
 
@@ -748,7 +748,6 @@ export function WindowPDPPage() {
               {/* Step 4 — Glass */}
               {currentStep === 4 && (
                 <div>
-                  <p className="font-mono text-xs text-brand uppercase tracking-widest mb-2">Step 04 of 06</p>
                   <h2 className="font-display text-3xl text-ink mb-2">Choose your glass</h2>
                   <p className="font-sans text-sm text-ink-muted mb-6">All glass is argon gas filled double glazed as standard.</p>
 
@@ -902,7 +901,6 @@ export function WindowPDPPage() {
               {/* Step 5 — Handle */}
               {currentStep === 5 && (
                 <div>
-                  <p className="font-mono text-xs text-brand uppercase tracking-widest mb-2">Step 05 of 06</p>
                   <h2 className="font-display text-3xl text-ink mb-2">Choose your handle colour</h2>
                   <p className="font-sans text-sm text-ink-muted mb-6">All windows include a standard lever handle. Choose your preferred finish.</p>
 
@@ -945,7 +943,6 @@ export function WindowPDPPage() {
               {/* Step 6 — Review */}
               {currentStep === 6 && widthMm && heightMm && openerCount !== null && externalColour && glassSelection && handleColour && (
                 <div>
-                  <p className="font-mono text-xs text-brand uppercase tracking-widest mb-2">Step 06 of 06</p>
                   <h2 className="font-display text-3xl text-ink mb-6">Review your window</h2>
 
                   <div className="bg-brand rounded-sm p-6 mb-6">
