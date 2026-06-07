@@ -15,6 +15,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage'
 import { WindowPDPPage } from './pages/WindowPDPPage'
 import { DoorCategoryPage } from './pages/DoorCategoryPage'
 import { CompositeDoorPLPPage } from './pages/CompositeDoorPLPPage'
+import { UPVCDoorPLPPage } from './pages/UPVCDoorPLPPage'
 import { DoorPLPPage } from './pages/DoorPLPPage'
 import { DoorPDPPage } from './pages/DoorPDPPage'
 import { QuickQuotePage } from './pages/QuickQuotePage'
@@ -56,7 +57,13 @@ export function App() {
         <Route path="/windows/:slug" element={<ProductDetailPage />} />
         <Route path="/doors" element={<DoorCategoryPage />} />
         <Route path="/doors/composite" element={<CompositeDoorPLPPage />} />
-        <Route path="/doors/:slug" element={<ProductDetailPage />} />
+        <Route path="/doors/upvc" element={<UPVCDoorPLPPage />} />
+        {/* Legacy product-type slugs from products[] array */}
+        <Route path="/doors/composite-doors" element={<ProductDetailPage />} />
+        <Route path="/doors/upvc-doors" element={<ProductDetailPage />} />
+        <Route path="/doors/french-doors" element={<ProductDetailPage />} />
+        <Route path="/doors/patio-doors" element={<ProductDetailPage />} />
+        <Route path="/doors/:slug" element={<DoorPDPPage />} />
         <Route path="/quick-quote" element={<QuickQuotePage />} />
         <Route path="/basket" element={<BasketPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
