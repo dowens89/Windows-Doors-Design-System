@@ -4,6 +4,7 @@ import {
   Check,
   ChevronRight,
   Search,
+  Info,
   Palette,
   Layers,
   Grip,
@@ -21,13 +22,12 @@ import { Button } from '../components/ds/Button'
 import { Alert } from '../components/ds/Alert'
 import { PriceDisplay } from '../components/ds/PriceDisplay'
 import { EmptyState } from '../components/ds/EmptyState'
+import { Input } from '../components/ds/Input'
 import { FAQ } from '../components/ds/FAQ'
 import { useSEO } from '../utils/seo'
 import { doorProducts } from '../data/products'
 import type { DoorProduct } from '../data/products'
 import { useBasketStore } from '../store/basketStore'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface SelectedColour {
   name: string
@@ -99,11 +99,11 @@ const STEP_CONFIG = [
   { number: 6, Icon: ClipboardList, tooltip: 'Review' },
 ]
 
-const SIDE_LIGHT_OPTIONS: { value: 'none' | 'left' | 'right' | 'both'; label: string; priceModifier: number }[] = [
-  { value: 'none', label: 'No side light', priceModifier: 0 },
-  { value: 'left', label: 'Left side panel', priceModifier: 200 },
-  { value: 'right', label: 'Right side panel', priceModifier: 200 },
-  { value: 'both', label: 'Both side panels', priceModifier: 400 },
+const SIDE_LIGHT_OPTIONS: { value: 'none' | 'left' | 'right' | 'both'; pill: string; label: string; priceModifier: number }[] = [
+  { value: 'none', pill: 'None', label: 'No side light', priceModifier: 0 },
+  { value: 'left', pill: 'Left', label: 'Left side panel', priceModifier: 200 },
+  { value: 'right', pill: 'Right', label: 'Right side panel', priceModifier: 200 },
+  { value: 'both', pill: 'Both', label: 'Both side panels', priceModifier: 400 },
 ]
 
 const TRUST_BADGES = [
@@ -226,12 +226,15 @@ export function DoorPDPPage() {
       case 4: {
         const parts: string[] = []
         if (topLight) parts.push('Top light')
-        const sideLightLabel = SIDE_LIGHT_OPTIONS.find((o) => o.value === sideLight)?.label
-        if (sideLight !== 'none' && sideLightLabel) parts.push(sideLightLabel)
+        if (sideLight === 'left') parts.push('Side light (left)')
+        if (sideLight === 'right') parts.push('Side light (right)')
+        if (sideLight === 'both') parts.push('Side light (both)')
         return parts.length ? parts.join(' · ') : 'No extras'
       }
       case 5:
-        return doorSize === 'large' ? 'Large door' : 'Standard door'
+        return doorSize === 'large'
+          ? 'Large door (over 920mm / 2100mm)'
+          : 'Standard (up to 920mm × 2100mm)'
       default:
         return ''
     }
@@ -252,34 +255,25 @@ export function DoorPDPPage() {
   }
 
   function handleAddToBasket() {
-    if (!selectedColour || !selectedGlazing || !selectedHandle) return
-    const variants: string[] = [selectedColour.name, selectedGlazing.type, selectedHandle.style, selectedHandle.finish]
-    if (letterbox) variants.push('Letterbox')
-    if (knocker) variants.push('Knocker')
-    if (doorNumbers) variants.push('Door numbers')
-    if (topLight) variants.push('Top light')
-    if (sideLight !== 'none') variants.push(SIDE_LIGHT_OPTIONS.find((o) => o.value === sideLight)?.label ?? '')
-    variants.push(doorSize === 'large' ? 'Large door' : 'Standard door')
-
+    if (!selectedColour || !selectedGlazing || !selectedHandle?.style || !selectedHandle?.finish) return
     addItem({
       productId: door.id,
       productName: door.name,
       category: 'doors',
       selectedVariants: {
         colour: selectedColour.name,
-        colourGroup: selectedColour.group,
         glazing: selectedGlazing.type,
         handleStyle: selectedHandle.style,
         handleFinish: selectedHandle.finish,
         letterbox: letterbox.toString(),
         knocker: knocker.toString(),
-        doorNumbers: doorNumbers.toString(),
+        numbers: doorNumbers.toString(),
         topLight: topLight.toString(),
         sideLight,
         size: doorSize,
-        reference: productReference,
+        productReference,
       },
-      variantSummary: variants.join(', '),
+      variantSummary: `${door.name} · ${selectedColour.name} · ${doorSize}`,
       indicativePrice: calculatedPrice,
       quantity: 1,
     })
@@ -690,45 +684,96 @@ export function DoorPDPPage() {
                         Step 04 of 06
                       </p>
                       <h2 className="font-display text-3xl text-ink mb-2">Add extras</h2>
-                      <p className="font-sans text-sm text-ink-muted mb-8">
-                        All optional. Glazed panels above and beside your door.
-                      </p>
+                      <p className="font-sans text-sm text-ink-muted mb-8">All optional.</p>
 
-                      <div className="border border-hairline rounded-sm divide-y divide-hairline mb-8">
-                        <div
-                          className="flex justify-between items-center py-3 px-4 cursor-pointer hover:bg-surface"
-                          onClick={() => setTopLight((v) => !v)}
-                        >
+                      {/* Top light card */}
+                      <div
+                        className={`bg-surface border rounded-sm p-5 mb-4 cursor-pointer transition-colors ${
+                          topLight
+                            ? 'border-brand bg-brand bg-opacity-5'
+                            : 'border-hairline hover:border-brand'
+                        }`}
+                        onClick={() => setTopLight((v) => !v)}
+                      >
+                        <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-display text-sm text-ink">Top light</p>
-                            <p className="font-sans text-xs text-ink-muted">
-                              Glazed panel above the door — brings light into the hallway
+                            <svg
+                              width="60"
+                              height="80"
+                              viewBox="0 0 60 80"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                x="0.75"
+                                y="0.75"
+                                width="58.5"
+                                height="78.5"
+                                rx="1"
+                                fill={selectedColour?.hex ?? '#E8E8E8'}
+                                stroke="#555"
+                                strokeWidth="1.5"
+                              />
+                              <rect
+                                x="4"
+                                y="4"
+                                width="52"
+                                height="22"
+                                fill="rgba(180,210,230,0.5)"
+                                stroke="#555"
+                                strokeWidth="0.75"
+                              />
+                              <rect
+                                x="4"
+                                y="30"
+                                width="52"
+                                height="46"
+                                fill={selectedColour?.hex ?? '#E8E8E8'}
+                                stroke="#555"
+                                strokeWidth="0.75"
+                              />
+                            </svg>
+                            <p className="font-display text-base text-ink mt-3">Top light</p>
+                            <p className="font-sans text-sm text-ink-muted mt-1">
+                              A glazed panel above the door to bring natural light into your hallway.
+                            </p>
+                            <p className="font-sans text-xs text-brand italic mt-2">
+                              If not needed at survey, your quote will be adjusted accordingly.
                             </p>
                           </div>
-                          <Toggle active={topLight} />
+                          <div className="ml-6 flex-shrink-0 mt-1">
+                            <Toggle active={topLight} />
+                          </div>
                         </div>
                       </div>
 
-                      <p className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-3">
-                        Side panels
-                      </p>
-                      <div className="grid grid-cols-2 gap-3 mb-8">
-                        {SIDE_LIGHT_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            onClick={() => setSideLight(opt.value)}
-                            className={`border rounded-sm p-4 text-left transition-colors ${
-                              sideLight === opt.value
-                                ? 'border-brand bg-brand bg-opacity-5'
-                                : 'border-hairline bg-surface hover:border-brand'
-                            }`}
-                          >
-                            <p className="font-display text-sm text-ink">{opt.label}</p>
-                          </button>
-                        ))}
+                      {/* Side light card */}
+                      <div className="bg-surface border border-hairline rounded-sm p-5 cursor-pointer">
+                        <p className="font-display text-base text-ink mb-2">Side light</p>
+                        <p className="font-sans text-sm text-ink-muted mb-1">
+                          A glazed panel beside your door.
+                        </p>
+                        <p className="font-sans text-xs text-ink-muted italic mb-4">
+                          If not needed at survey, your quote will be adjusted accordingly.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {SIDE_LIGHT_OPTIONS.map((opt) => (
+                            <button
+                              key={opt.value}
+                              onClick={() => setSideLight(opt.value)}
+                              className={`px-3 py-1.5 rounded-sm text-sm font-sans transition-colors ${
+                                sideLight === opt.value
+                                  ? 'bg-brand text-paper'
+                                  : 'border border-hairline text-ink hover:border-brand'
+                              }`}
+                            >
+                              {opt.pill}
+                            </button>
+                          ))}
+                        </div>
                       </div>
 
-                      <div className="flex justify-between">
+                      <div className="flex justify-between mt-8">
                         <Button variant="ghost" onClick={() => setCurrentStep(3)}>
                           ← Back
                         </Button>
@@ -749,11 +794,10 @@ export function DoorPDPPage() {
                         Standard or large door?
                       </h2>
                       <p className="font-sans text-sm text-ink-muted mb-8">
-                        Most UK homes have a standard door opening. Your surveyor will confirm exact
-                        measurements on their visit.
+                        Most UK homes have a standard door opening.
                       </p>
 
-                      <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="grid grid-cols-2 gap-4">
                         <button
                           onClick={() => setDoorSize('standard')}
                           className={`border rounded-sm p-6 text-left transition-colors ${
@@ -763,9 +807,11 @@ export function DoorPDPPage() {
                           }`}
                         >
                           <p className="font-display text-lg text-ink">Standard</p>
-                          <p className="font-sans text-xs text-ink-muted mt-1">Up to 920mm wide</p>
-                          <p className="font-sans text-xs text-ink-muted mt-2">
-                            Suits the vast majority of UK homes.
+                          <p className="font-sans text-sm text-ink-muted mt-1">
+                            Up to 920mm wide × 2100mm tall
+                          </p>
+                          <p className="font-sans text-xs text-ink-muted mt-3">
+                            Suits the vast majority of UK homes. Your surveyor confirms the exact fit.
                           </p>
                         </button>
                         <button
@@ -777,21 +823,25 @@ export function DoorPDPPage() {
                           }`}
                         >
                           <p className="font-display text-lg text-ink">Large door</p>
-                          <p className="font-sans text-xs text-ink-muted mt-1">Over 920mm wide</p>
-                          <p className="font-sans text-xs text-ink-muted mt-2">
-                            Common in newer builds and converted properties.
+                          <p className="font-sans text-sm text-ink-muted mt-1">
+                            Over 920mm wide or 2100mm tall
+                          </p>
+                          <p className="font-sans text-xs text-ink-muted mt-3">
+                            For wider or taller-than-standard openings. Common in newer builds and
+                            converted properties.
                           </p>
                         </button>
                       </div>
 
-                      <div className="bg-surface border border-hairline rounded-sm p-4 mb-8">
+                      <div className="bg-surface border border-hairline rounded-sm p-4 mt-4 flex gap-2 items-start">
+                        <Info className="w-4 h-4 text-brand flex-shrink-0 mt-0.5" />
                         <p className="font-sans text-sm text-ink-muted">
-                          Not sure? Select standard. Your installer will identify any adjustment
-                          needed at survey and discuss it with you before any work begins.
+                          Not sure? Select standard. If your opening is larger your installer will
+                          confirm at survey before any work begins.
                         </p>
                       </div>
 
-                      <div className="flex justify-between">
+                      <div className="flex justify-between mt-8">
                         <Button variant="ghost" onClick={() => setCurrentStep(4)}>
                           ← Back
                         </Button>
@@ -812,23 +862,33 @@ export function DoorPDPPage() {
 
                       <div className="bg-brand rounded-sm p-6 mb-6">
                         <p className="font-sans text-xs text-paper opacity-70 uppercase tracking-wide mb-4">
-                          Your configuration
+                          Your specification
                         </p>
 
                         {(
                           [
                             ['Door', door.name],
-                            ['Range', door.rangeName],
                             ['Colour', selectedColour?.name ?? '—'],
-                            ['Glazing', isSolid ? 'None (solid door)' : selectedGlazing?.type ?? '—'],
-                            ['Handle', selectedHandle?.style ?? '—'],
-                            ['Handle finish', selectedHandle?.finish ?? '—'],
-                            ['Letterbox', letterbox ? 'Yes' : 'No'],
-                            ['Door knocker', knocker ? 'Yes' : 'No'],
-                            ['Door numbers', doorNumbers ? 'Yes' : 'No'],
-                            ['Top light', topLight ? 'Yes' : 'No'],
-                            ['Side panels', SIDE_LIGHT_OPTIONS.find((o) => o.value === sideLight)?.label ?? 'None'],
-                            ['Size', doorSize === 'large' ? 'Large door' : 'Standard door'],
+                            ['Internal', 'White (standard)'],
+                            ...(!isSolid
+                              ? [['Glazing', selectedGlazing?.type ?? '—'] as [string, string]]
+                              : []),
+                            ['Handle', `${selectedHandle?.style ?? '—'} · ${selectedHandle?.finish ?? '—'}`],
+                            ['Letterbox', letterbox ? 'Yes' : 'Not selected'],
+                            ['Knocker', knocker ? 'Yes' : 'Not selected'],
+                            ['Numbers', doorNumbers ? 'Yes' : 'Not selected'],
+                            ['Top light', topLight ? 'Yes' : 'Not selected'],
+                            [
+                              'Side light',
+                              sideLight === 'none'
+                                ? 'Not selected'
+                                : SIDE_LIGHT_OPTIONS.find((o) => o.value === sideLight)?.label ?? sideLight,                            ],
+                            [
+                              'Size',
+                              doorSize === 'large'
+                                ? 'Large door (over 920mm / 2100mm)'
+                                : 'Standard (up to 920mm × 2100mm)',
+                            ],
                           ] as [string, string][]
                         ).map(([label, value]) => (
                           <div key={label} className="flex justify-between py-1">
@@ -839,123 +899,47 @@ export function DoorPDPPage() {
 
                         <div className="border-t border-paper border-opacity-20 my-4" />
 
-                        {/* Price breakdown */}
-                        <div className="space-y-1 mb-3">
-                          <div className="flex justify-between">
-                            <span className="font-sans text-xs text-paper opacity-70">
-                              {door.name} (base price)
-                            </span>
-                            <span className="font-mono text-xs text-paper">
-                              £{door.basePrice.toLocaleString('en-GB')}
-                            </span>
-                          </div>
-                          {selectedColour?.group === 'premium' && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">Premium colour</span>
-                              <span className="font-mono text-xs text-paper">+ £50</span>
-                            </div>
-                          )}
-                          {selectedGlazing && selectedGlazing.priceModifier > 0 && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">
-                                {selectedGlazing.type === 'obscure' ? 'Obscure glazing' : 'Decorative glazing'}
-                              </span>
-                              <span className="font-mono text-xs text-paper">+ £{selectedGlazing.priceModifier}</span>
-                            </div>
-                          )}
-                          {selectedHandle && selectedHandle.priceModifier > 0 && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">{selectedHandle.style}</span>
-                              <span className="font-mono text-xs text-paper">+ £{selectedHandle.priceModifier}</span>
-                            </div>
-                          )}
-                          {letterbox && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">Letterbox</span>
-                              <span className="font-mono text-xs text-paper">+ £50</span>
-                            </div>
-                          )}
-                          {knocker && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">Door knocker</span>
-                              <span className="font-mono text-xs text-paper">+ £50</span>
-                            </div>
-                          )}
-                          {doorNumbers && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">Door numbers</span>
-                              <span className="font-mono text-xs text-paper">+ £25</span>
-                            </div>
-                          )}
-                          {topLight && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">Top light</span>
-                              <span className="font-mono text-xs text-paper">+ £150</span>
-                            </div>
-                          )}
-                          {sideLight !== 'none' && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">
-                                {SIDE_LIGHT_OPTIONS.find((o) => o.value === sideLight)?.label}
-                              </span>
-                              <span className="font-mono text-xs text-paper">
-                                + £{SIDE_LIGHT_OPTIONS.find((o) => o.value === sideLight)?.priceModifier}
-                              </span>
-                            </div>
-                          )}
-                          {doorSize === 'large' && (
-                            <div className="flex justify-between">
-                              <span className="font-sans text-xs text-paper opacity-70">Large door (+ 10%)</span>
-                              <span className="font-mono text-xs text-paper">included above</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="border-t border-paper border-opacity-20 my-3" />
-                        <div className="flex justify-between mb-1">
-                          <span className="font-sans text-xs text-paper opacity-70">VAT (20%)</span>
-                          <span className="font-mono text-xs text-paper">included</span>
-                        </div>
-                        <div className="border-t border-paper border-opacity-20 my-3" />
-                        <div className="flex justify-between">
-                          <span className="font-display text-base text-paper">
-                            Indicative installed price
-                          </span>
-                          <span className="font-mono text-lg text-paper">{priceFormatted}</span>
-                        </div>
+                        <p className="font-display text-xl text-paper mb-2">
+                          Estimated installed price
+                        </p>
+                        <p className="font-mono text-4xl text-paper font-medium tracking-tight">
+                          {priceFormatted}
+                        </p>
                         <p className="font-sans text-xs text-paper opacity-60 mt-2">
-                          Confirmed at survey. No payment today.
+                          Inc. VAT · Indicative price. Confirmed by your surveyor before any work
+                          begins.
                         </p>
                       </div>
 
                       <div className="mb-6">
-                        <label className="font-sans text-sm font-medium text-ink block mb-1">
-                          Your reference (optional)
-                        </label>
-                        <input
-                          type="text"
+                        <Input
+                          label="Your reference (optional)"
+                          placeholder="e.g. Front door, main entrance"
                           maxLength={40}
-                          placeholder="e.g. Front door, master bedroom"
                           value={productReference}
                           onChange={(e) => setProductReference(e.target.value)}
-                          className="w-full border border-hairline rounded-sm px-3 py-2 font-sans text-sm text-ink bg-paper focus:outline-none focus:border-brand"
+                          helperText="Helps your installer identify the door on their visit."
                         />
-                        <p className="font-sans text-xs text-ink-muted mt-1">
-                          Helps your installer identify the door on their visit.
-                        </p>
                       </div>
 
-                      <div className="flex justify-between items-center">
+                      <Button
+                        variant="accent"
+                        size="lg"
+                        className="w-full mt-6"
+                        onClick={handleAddToBasket}
+                        disabled={
+                          !selectedColour ||
+                          !selectedGlazing ||
+                          !selectedHandle?.style ||
+                          !selectedHandle?.finish
+                        }
+                      >
+                        Add to Quote
+                      </Button>
+
+                      <div className="mt-4">
                         <Button variant="ghost" onClick={() => setCurrentStep(5)}>
                           ← Back
-                        </Button>
-                        <Button
-                          variant="accent"
-                          size="lg"
-                          onClick={handleAddToBasket}
-                          disabled={!selectedColour || !selectedGlazing || !selectedHandle?.style || !selectedHandle?.finish}
-                        >
-                          Add to Quote
                         </Button>
                       </div>
                     </div>
@@ -978,7 +962,6 @@ export function DoorPDPPage() {
                 </Button>
                 <Button
                   variant="secondary"
-                  size="md"
                   className="w-full"
                   onClick={() => navigate('/basket')}
                 >
@@ -986,11 +969,10 @@ export function DoorPDPPage() {
                 </Button>
                 <Button
                   variant="ghost"
-                  size="md"
                   className="w-full"
-                  onClick={() => navigate('/doors')}
+                  onClick={() => navigate('/doors/composite')}
                 >
-                  Continue browsing
+                  Return to range
                 </Button>
               </div>
             )}
