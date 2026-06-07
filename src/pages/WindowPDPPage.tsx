@@ -12,6 +12,7 @@ import {
 import type { WindowQuoteInput, WindowQuoteResult } from '../pricing'
 import { useBasketStore } from '../store/basketStore'
 import { useSEO } from '../utils/seo'
+import { Layout } from '../components/Layout'
 import { WindowDiagram } from '../components/WindowDiagram'
 
 // ─── Local interfaces ─────────────────────────────────────────────────────────
@@ -347,10 +348,11 @@ export function WindowPDPPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
+    <Layout>
     <div className="min-h-screen bg-paper">
 
       {/* Sticky header */}
-      <div className="sticky top-0 z-50 bg-paper border-b border-hairline py-3 px-4 md:px-8">
+      <div className="sticky top-0 z-40 bg-paper border-b border-hairline py-3 px-4 md:px-8">
         <div className="max-w-6xl mx-auto flex justify-between items-center gap-4">
 
           <div className="hidden md:flex items-center gap-1 text-xs text-ink-muted font-sans uppercase tracking-wide flex-shrink-0">
@@ -1157,5 +1159,6 @@ export function WindowPDPPage() {
       </div>
 
     </div>
+    </Layout>
   )
 }
