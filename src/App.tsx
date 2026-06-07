@@ -14,6 +14,7 @@ import { ShopPage } from './pages/ShopPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
 import { WindowPDPPage } from './pages/WindowPDPPage'
 import { DoorCategoryPage } from './pages/DoorCategoryPage'
+import { CompositeDoorPLPPage } from './pages/CompositeDoorPLPPage'
 import { DoorPLPPage } from './pages/DoorPLPPage'
 import { DoorPDPPage } from './pages/DoorPDPPage'
 import { QuickQuotePage } from './pages/QuickQuotePage'
@@ -54,6 +55,7 @@ export function App() {
         <Route path="/windows/casement-windows" element={<WindowPDPPage />} />
         <Route path="/windows/:slug" element={<ProductDetailPage />} />
         <Route path="/doors" element={<DoorCategoryPage />} />
+        <Route path="/doors/composite" element={<CompositeDoorPLPPage />} />
         <Route path="/doors/:slug" element={<ProductDetailPage />} />
         <Route path="/quick-quote" element={<QuickQuotePage />} />
         <Route path="/basket" element={<BasketPage />} />
