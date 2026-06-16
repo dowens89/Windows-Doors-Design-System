@@ -413,10 +413,20 @@ export function WindowPDPPage() {
                 </span>
                 <span className="font-sans text-xs text-ink-muted italic">Inc. VAT · indicative</span>
               </>
-            ) : widthMm && heightMm ? (
+            ) : widthMm || heightMm ? (
               <span className="font-sans text-xs text-ink-muted italic">Calculating...</span>
             ) : (
-              <span className="font-sans text-xs text-ink-muted italic">Enter size for price</span>
+              <>
+                <span className="font-sans text-xs text-ink-muted uppercase tracking-wide mb-0.5">
+                  Installed price
+                </span>
+                <span className="font-mono text-base text-ink-muted">
+                  From £306
+                </span>
+                <span className="font-sans text-xs text-ink-muted italic mt-0.5">
+                  Inc. VAT · enter size for your price
+                </span>
+              </>
             )}
           </div>
 
@@ -737,6 +747,16 @@ export function WindowPDPPage() {
                   {externalColour && (
                     <div className="bg-surface border border-hairline rounded-sm p-3">
                       <p className="font-sans text-sm text-ink">{externalColour.name}</p>
+                      {externalColour.upliftType !== 'white' && (
+                        <p className="font-sans text-xs text-ink-muted mt-1 mb-1">
+                          Base price before colour uplift:{' '}
+                          <span className="font-mono">
+                            £{priceBreakdown
+                              ? Math.round(priceBreakdown.subtotal * 1.20)
+                              : '—'}
+                          </span>
+                        </p>
+                      )}
                     </div>
                   )}
 

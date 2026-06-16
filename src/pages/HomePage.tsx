@@ -335,6 +335,9 @@ export function HomePage() {
                   Based on standard installation costs. Your surveyor confirms before any
                   work begins.
                 </p>
+                <p className="font-sans text-sm text-paper opacity-70 mt-2 text-center">
+                  Includes supply and professional installation by a vetted local installer. Confirmed by your surveyor before work begins.
+                </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
                   <Button
                     variant="primary"

@@ -738,7 +738,7 @@ export function DoorPDPPage() {
                               A glazed panel above the door to bring natural light into your hallway.
                             </p>
                             <p className="font-sans text-xs text-brand italic mt-2">
-                              If not needed at survey, your quote will be adjusted accordingly.
+                              If not needed at survey, this will be removed and your price reduced.
                             </p>
                           </div>
                           <div className="ml-6 flex-shrink-0 mt-1">
@@ -754,7 +754,7 @@ export function DoorPDPPage() {
                           A glazed panel beside your door.
                         </p>
                         <p className="font-sans text-xs text-ink-muted italic mb-4">
-                          If not needed at survey, your quote will be adjusted accordingly.
+                          If not needed at survey, this will be removed and your price reduced.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {SIDE_LIGHT_OPTIONS.map((opt) => (
