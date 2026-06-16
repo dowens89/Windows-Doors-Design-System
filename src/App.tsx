@@ -45,6 +45,10 @@ function ScrollToTop() {
   return null
 }
 
+const isDev =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+
 export function App() {
   return (
     <BrowserRouter>
@@ -76,9 +80,9 @@ export function App() {
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/design-system" element={<DesignSystem />} />
-        {/* DEV ONLY — remove before launch */}
-        <Route path="/pricing-debug" element={<PricingDebugPage />} />
-        <Route path="/pricing-admin" element={<PricingAdminPage />} />
+        {/* DEV ONLY — gated by hostname */}
+        <Route path="/pricing-debug" element={isDev ? <PricingDebugPage /> : <Navigate to="/" replace />} />
+        <Route path="/pricing-admin" element={isDev ? <PricingAdminPage /> : <Navigate to="/" replace />} />
         <Route path="/installer" element={<InstallerPricingTool />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
